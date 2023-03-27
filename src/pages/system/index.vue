@@ -11,7 +11,7 @@
       </div>
     </div>
 
-    <dialog-form v-model:visible="formDialogVisible" :is-edit="isEdit" :data="formData" @change="fetchData" />
+    <dialog-form v-model:visible="formDialogVisible" :is-edit="isEdit" :data="formData" />
 
     <template v-if="pagination.total > 0 && !dataLoading">
       <div class="list-card-items">
@@ -21,7 +21,7 @@
               pagination.pageSize * (pagination.page - 1),
               pagination.pageSize * pagination.page,
             )"
-            :key="system.index"
+            :key="system.id"
             :lg="4"
             :xs="6"
             :xl="3"
@@ -31,6 +31,7 @@
               :item="system"
               @delete-item="handleDeleteItem"
               @manage-product="handleManageProduct"
+              @click="clickTap(system)"
             />
           </t-col>
         </t-row>
@@ -82,7 +83,9 @@ const deleteSystem = ref(undefined);
 const systemList = ref([]);
 const dataLoading = ref(true);
 const isEdit = ref(false);
-
+const clickTap = (system: SystemModel) => {
+  console.log('first', system);
+};
 const fetchData = async () => {
   try {
     const { page, pageSize } = pagination.value;

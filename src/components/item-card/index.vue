@@ -17,14 +17,20 @@
       <p class="list-card-item_detail--desc">{{ item.remark }}</p>
     </template>
     <template #footer>
-      <t-avatar-group cascading="left-up" :max="2">
-        <t-avatar>{{ item.principalName }}</t-avatar>
-        <t-avatar
-          ><template #icon>
-            <add-icon />
-          </template>
-        </t-avatar>
-      </t-avatar-group>
+      <div class="flex justify-between items-center">
+        <t-avatar-group cascading="left-up" :max="2">
+          <t-avatar>{{ item.principalName }}</t-avatar>
+          <t-avatar
+            ><template #icon>
+              <add-icon />
+            </template>
+          </t-avatar>
+        </t-avatar-group>
+        <div>
+          <t-button size="small" ghost>数据共享</t-button>
+          <t-button size="small" ghost theme="success">数据规范</t-button>
+        </div>
+      </div>
     </template>
     <template #actions>
       <t-dropdown
@@ -42,7 +48,7 @@
           },
         ]"
       >
-        <t-button theme="default" shape="square" variant="text">
+        <t-button theme="default" shape="square" variant="text" @click.stop>
           <more-icon />
         </t-button>
       </t-dropdown>
@@ -50,7 +56,7 @@
   </t-card>
 </template>
 <script setup lang="ts">
-import { onMounted, PropType } from 'vue';
+import { PropType } from 'vue';
 import { ShopIcon, MoreIcon, AddIcon } from 'tdesign-icons-vue-next';
 import { SystemModel } from '@/api/model/system';
 // eslint-disable-next-line
@@ -59,12 +65,7 @@ const props = defineProps({
     type: Object as PropType<SystemModel>,
   },
 });
-
-onMounted(() => {
-  console.log('product', props.item);
-});
-
-const emit = defineEmits(['manage-product', 'delete-item']);
+const emit = defineEmits(['manage-product', 'delete-item', 'item-click']);
 
 const handleClickManage = (product: SystemModel) => {
   emit('manage-product', product);
