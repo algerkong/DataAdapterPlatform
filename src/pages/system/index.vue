@@ -31,7 +31,6 @@
               :item="system"
               @delete-item="handleDeleteItem"
               @manage-product="handleManageProduct"
-              @click="clickTap(system)"
             />
           </t-col>
         </t-row>
@@ -83,9 +82,6 @@ const deleteSystem = ref(undefined);
 const systemList = ref([]);
 const dataLoading = ref(true);
 const isEdit = ref(false);
-const clickTap = (system: SystemModel) => {
-  console.log('first', system);
-};
 const fetchData = async () => {
   try {
     const { page, pageSize } = pagination.value;

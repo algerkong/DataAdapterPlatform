@@ -27,8 +27,8 @@
           </t-avatar>
         </t-avatar-group>
         <div>
-          <t-button size="small" ghost>数据共享</t-button>
-          <t-button size="small" ghost theme="success">数据规范</t-button>
+          <t-button size="small" ghost @click.stop="clickdataSharing">数据共享</t-button>
+          <t-button size="small" ghost theme="success" @click="clickdataSpecification">数据规范</t-button>
         </div>
       </div>
     </template>
@@ -57,6 +57,7 @@
 </template>
 <script setup lang="ts">
 import { PropType } from 'vue';
+import { useRouter } from 'vue-router';
 import { ShopIcon, MoreIcon, AddIcon } from 'tdesign-icons-vue-next';
 import { SystemModel } from '@/api/model/system';
 // eslint-disable-next-line
@@ -65,7 +66,25 @@ const props = defineProps({
     type: Object as PropType<SystemModel>,
   },
 });
+
+const Router = useRouter();
+
 const emit = defineEmits(['manage-product', 'delete-item', 'item-click']);
+
+const clickdataSharing = () => {
+  Router.push({
+    path: `/system/dataSharing/${props.item.id}`,
+  });
+};
+
+const clickdataSpecification = () => {
+  Router.push({
+    path: '/system/dataSpecification',
+    params: {
+      id: props.item.id,
+    },
+  });
+};
 
 const handleClickManage = (product: SystemModel) => {
   emit('manage-product', product);
