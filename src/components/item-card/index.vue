@@ -40,12 +40,13 @@
   </t-card>
 </template>
 <script setup lang="ts">
+import { MessagePlugin } from 'tdesign-vue-next';
 import { PropType, ref } from 'vue';
 import { ShopIcon, MoreIcon } from 'tdesign-icons-vue-next';
+import { useRouter } from 'vue-router';
 import { SystemModel } from '@/api/model/system';
 import { systemOn, systemOff } from '@/api/system';
 import proxy from '@/config/proxy';
-import { MessagePlugin } from 'tdesign-vue-next';
 
 const props = defineProps({
   item: {
@@ -89,6 +90,23 @@ const clickOnline = async () => {
     MessagePlugin.success('启用成功');
   }
   emit('refresh');
+};
+
+const Router = useRouter();
+
+const clickdataSharing = () => {
+  Router.push({
+    path: `/system/dataSharing/${props.item.id}`,
+  });
+};
+
+const clickdataSpecification = () => {
+  Router.push({
+    path: '/system/dataSpecification',
+    params: {
+      id: props.item.id,
+    },
+  });
 };
 </script>
 
