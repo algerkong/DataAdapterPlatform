@@ -40,21 +40,43 @@
   </t-card>
 </template>
 <script setup lang="ts">
-import { PropType } from 'vue';
-import { ShopIcon, MoreIcon, AddIcon } from 'tdesign-icons-vue-next';
+import { PropType, ref } from 'vue';
+import { ShopIcon, MoreIcon } from 'tdesign-icons-vue-next';
 import { SystemModel } from '@/api/model/system';
 import { systemOn, systemOff } from '@/api/system';
 import proxy from '@/config/proxy';
+import { MessagePlugin } from 'tdesign-vue-next';
 
 const props = defineProps({
   item: {
     type: Object as PropType<SystemModel>,
   },
 });
-const emit = defineEmits(['manage-product', 'delete-item', 'item-click']);
 
-const handleClickManage = (product: SystemModel) => {
-  emit('manage-product', product);
+const dropdownOptions = ref([
+  {
+    content: '管理',
+    value: 'manage',
+    onClick: () => handleClickManage(),
+  },
+  {
+    content: '删除',
+    value: 'delete',
+    onClick: () => handleClickDelete(),
+  },
+]);
+const emit = defineEmits(['manage-product', 'delete-item', 'item-click', 'refresh']);
+
+const handleClickManage = () => {
+  emit('manage-product', props.item);
+};
+
+const handleClickDelete = () => {
+  if (props.item.isOnline) {
+    MessagePlugin.error('请先停用该系统');
+    return;
+  }
+  emit('delete-item', props.item);
 };
 
 const clickOnline = async () => {
