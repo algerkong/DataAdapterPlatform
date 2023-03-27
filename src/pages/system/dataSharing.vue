@@ -55,12 +55,11 @@
 import { ref, reactive, toRefs } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { ErrorCircleFilledIcon, CheckCircleFilledIcon, CloseCircleFilledIcon } from 'tdesign-icons-vue-next';
-import { MessagePlugin } from 'tdesign-vue-next';
+import { BaseTableColumns, MessagePlugin } from 'tdesign-vue-next';
 import { getDataSharingList } from '@/api/dataSharing';
 
 const Route = useRoute();
 const Router = useRouter();
-const align = ref('center');
 const total = ref(0);
 const id = ref(Route.params.id);
 const lists = reactive({
@@ -71,34 +70,35 @@ const pages = reactive({
   current: 1,
   pageSize: 10,
 });
-const columns = [
+const visible = true;
+const columns: BaseTableColumns = [
   {
     colKey: 'applicant',
     title: '任务名称',
     // type-slot-name 会被用于自定义单元格的插槽名称
     cell: 'type-slot-name',
     width: 120,
-    align: align.value,
+    align: 'center',
   },
   {
     title: '传输类型',
     // 没有 cell 的情况下， platform 会被用作自定义单元格的插槽名称
     colKey: 'status',
     width: 120,
-    align: align.value,
+    align: 'center',
   },
   {
     colKey: 'taskFrequency',
     title: '推送方式',
-    align: align.value,
+    align: 'center',
   },
   {
     title: '是否在线',
     colKey: 'email',
-    align: align.value,
+    align: 'center',
   },
-  { colKey: 'createTime', title: '申请时间', align: align.value },
-  { colKey: 'operates', title: '操作', align: align.value },
+  { colKey: 'createTime', title: '申请时间', align: 'center' },
+  { colKey: 'operates', title: '操作', align: 'center' },
 ];
 
 const getLists = async () => {

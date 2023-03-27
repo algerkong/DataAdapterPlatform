@@ -35,11 +35,6 @@
               :item="system"
               @delete-item="handleDeleteItem"
               @manage-product="handleManageProduct"
-<<<<<<< HEAD
-=======
-              @click="clickTap(system)"
-              @refresh="fetchData"
->>>>>>> 5c3f8da7fc18ea35860d2f8055b8b2570077bef2
             />
           </t-col>
         </t-row>
@@ -70,13 +65,6 @@
   </div>
 </template>
 
-<script lang="ts">
-export default {
-  name: 'ListCard',
-  components: { RefreshIcon },
-};
-</script>
-
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { RefreshIcon, SearchIcon } from 'tdesign-icons-vue-next';
@@ -92,15 +80,10 @@ const deleteSystem = ref(undefined);
 const systemList = ref([]);
 const dataLoading = ref(true);
 const isEdit = ref(false);
-<<<<<<< HEAD
-=======
-const clickTap = (system: SystemModel) => {
-  console.log('first', system);
-};
+
 const searchParams = ref({
   systemName: '',
 });
->>>>>>> 5c3f8da7fc18ea35860d2f8055b8b2570077bef2
 const fetchData = async () => {
   dataLoading.value = true;
   pagination.value.total = 0;
