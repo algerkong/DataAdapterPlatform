@@ -1,5 +1,6 @@
 export default {
   isRequestProxy: false,
+  baseUrl: 'http://127.0.0.1:3000',
   development: {
     // 开发环境接口请求
     // host: 'https://service-exndqyuk-1257786608.gz.apigw.tencentcs.com',

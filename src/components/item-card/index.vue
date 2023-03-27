@@ -1,11 +1,13 @@
 <template>
   <t-card theme="poster2">
     <template #avatar>
-      <t-avatar size="56px">
-        <template #icon>
-          <shop-icon />
-        </template>
-      </t-avatar>
+      <div
+        class="rounded-full bg-blue-100 flex justify-center items-center ring-4 overflow-hidden"
+        style="width: 60px; height: 60px"
+      >
+        <img v-if="item.systemIcon" class="w-full h-full" :src="`${proxy.baseUrl}/images/${item.systemIcon}`" />
+        <shop-icon v-else class="text-gray-400 text-3xl" />
+      </div>
     </template>
     <template #status>
       <t-popconfirm :content="item.isOnline ? '确认停用吗' : '确认启用吗'" @confirm="clickOnline">
@@ -43,6 +45,7 @@ import { ShopIcon, MoreIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { SystemModel } from '@/api/model/system';
 import { systemOn, systemOff } from '@/api/system';
+import proxy from '@/config/proxy';
 
 const props = defineProps({
   item: {
