@@ -32,3 +32,15 @@ export const editSystem = (id: string, data: SystemModel) => {
     data,
   });
 };
+
+export const systemOn = (id: string) => {
+  return request.post({
+    url: `${Api.system}/on/${id}`,
+  });
+};
+
+export const systemOff = (id: string) => {
+  return request.post({
+    url: `${Api.system}/off/${id}`,
+  });
+};

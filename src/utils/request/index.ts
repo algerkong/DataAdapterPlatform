@@ -1,3 +1,4 @@
+import { MessagePlugin } from 'tdesign-vue-next';
 // axios配置  可自行根据项目进行更改，只需更改该文件即可，其他文件可以不动
 import isString from 'lodash/isString';
 import merge from 'lodash/merge';
@@ -127,6 +128,8 @@ const transform: AxiosTransform = {
 
   // 响应错误处理
   responseInterceptorsCatch: (error: any) => {
+    console.log('error', error);
+    MessagePlugin.error(error.response.data.message || '请求错误');
     const { config } = error;
     if (!config || !config.requestOptions.retry) return Promise.reject(error);
 
@@ -186,10 +189,10 @@ function createAxios(opt?: Partial<CreateAxiosOptions>) {
           // 是否携带token
           withToken: true,
           // 重试
-          retry: {
-            count: 3,
-            delay: 1000,
-          },
+          // retry: {
+          //   count: 3,
+          //   delay: 1000,
+          // },
         },
       },
       opt || {},

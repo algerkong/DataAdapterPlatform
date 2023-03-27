@@ -1,16 +1,19 @@
 <template>
   <t-card theme="poster2">
     <template #avatar>
-      <t-avatar size="56px">
-        <template #icon>
-          <shop-icon />
-        </template>
-      </t-avatar>
+      <div
+        class="rounded-full bg-blue-100 flex justify-center items-center ring-4 overflow-hidden"
+        style="width: 60px; height: 60px"
+      >
+        <img v-if="item.systemIcon" class="w-full h-full" :src="`${proxy.baseUrl}/images/${item.systemIcon}`" />
+        <shop-icon v-else class="text-gray-400 text-3xl" />
+      </div>
     </template>
     <template #status>
-      <t-tag :theme="item.isOnline ? 'success' : 'default'" :disabled="!item.isOnline">{{
-        item.isOnline ? '已启用' : '已停用'
-      }}</t-tag>
+      <t-popconfirm :content="item.isOnline ? '确认停用吗' : '确认启用吗'" @confirm="clickOnline">
+        <t-tag v-if="item.isOnline" theme="success">已启用</t-tag>
+        <t-tag v-else theme="primary" variant="outline">已停用</t-tag>
+      </t-popconfirm>
     </template>
     <template #content>
       <p class="list-card-item_detail--name">{{ item.systemName }}</p>
@@ -20,11 +23,6 @@
       <div class="flex justify-between items-center">
         <t-avatar-group cascading="left-up" :max="2">
           <t-avatar>{{ item.principalName }}</t-avatar>
-          <t-avatar
-            ><template #icon>
-              <add-icon />
-            </template>
-          </t-avatar>
         </t-avatar-group>
         <div>
           <t-button size="small" ghost @click.stop="clickdataSharing">数据共享</t-button>
@@ -33,21 +31,7 @@
       </div>
     </template>
     <template #actions>
-      <t-dropdown
-        trigger="click"
-        :options="[
-          {
-            content: '管理',
-            value: 'manage',
-            onClick: () => handleClickManage(item),
-          },
-          {
-            content: '删除',
-            value: 'delete',
-            onClick: () => handleClickDelete(item),
-          },
-        ]"
-      >
+      <t-dropdown trigger="click" :options="dropdownOptions">
         <t-button theme="default" shape="square" variant="text" @click.stop>
           <more-icon />
         </t-button>
@@ -57,41 +41,32 @@
 </template>
 <script setup lang="ts">
 import { PropType } from 'vue';
-import { useRouter } from 'vue-router';
 import { ShopIcon, MoreIcon, AddIcon } from 'tdesign-icons-vue-next';
 import { SystemModel } from '@/api/model/system';
-// eslint-disable-next-line
+import { systemOn, systemOff } from '@/api/system';
+import proxy from '@/config/proxy';
+
 const props = defineProps({
   item: {
     type: Object as PropType<SystemModel>,
   },
 });
-
-const Router = useRouter();
-
 const emit = defineEmits(['manage-product', 'delete-item', 'item-click']);
-
-const clickdataSharing = () => {
-  Router.push({
-    path: `/system/dataSharing/${props.item.id}`,
-  });
-};
-
-const clickdataSpecification = () => {
-  Router.push({
-    path: '/system/dataSpecification',
-    params: {
-      id: props.item.id,
-    },
-  });
-};
 
 const handleClickManage = (product: SystemModel) => {
   emit('manage-product', product);
 };
 
-const handleClickDelete = (product: SystemModel) => {
-  emit('delete-item', product);
+const clickOnline = async () => {
+  const { isOnline, id } = props.item;
+  if (isOnline) {
+    await systemOff(id);
+    MessagePlugin.success('停用成功');
+  } else {
+    await systemOn(id);
+    MessagePlugin.success('启用成功');
+  }
+  emit('refresh');
 };
 </script>
 
