@@ -42,6 +42,7 @@
 <script setup lang="ts">
 import { PropType } from 'vue';
 import { ShopIcon, MoreIcon, AddIcon } from 'tdesign-icons-vue-next';
+import { useRouter } from 'vue-router';
 import { SystemModel } from '@/api/model/system';
 import { systemOn, systemOff } from '@/api/system';
 import proxy from '@/config/proxy';
@@ -67,6 +68,23 @@ const clickOnline = async () => {
     MessagePlugin.success('启用成功');
   }
   emit('refresh');
+};
+
+const Router = useRouter();
+
+const clickdataSharing = () => {
+  Router.push({
+    path: `/system/dataSharing/${props.item.id}`,
+  });
+};
+
+const clickdataSpecification = () => {
+  Router.push({
+    path: '/system/dataSpecification',
+    params: {
+      id: props.item.id,
+    },
+  });
 };
 </script>
 
