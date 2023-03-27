@@ -4,25 +4,25 @@
       <!-- 表单内容 -->
       <t-form ref="form" :data="formData" :rules="rules" :label-width="100" @submit="onSubmit">
         <t-form-item label="系统名称" name="systemName">
-          <t-input v-model="formData.systemName" :style="{ width: '480px' }" placeholder="请输入系统名称" />
+          <t-input v-model="formData.systemName" placeholder="请输入系统名称" />
         </t-form-item>
         <t-form-item label="系统图标" name="systemIcon">
-          <t-input v-model="formData.systemIcon" :style="{ width: '480px' }" placeholder="请输入系统名称" />
+          <t-input v-model="formData.systemIcon" placeholder="请输入系统名称" />
         </t-form-item>
         <t-form-item label="系统描述" name="remark">
-          <t-input v-model="formData.remark" :style="{ width: '480px' }" placeholder="请输入系统描述" />
+          <t-textarea v-model="formData.remark" placeholder="请输入系统描述" />
         </t-form-item>
         <t-form-item label="系统链接地址" name="systemUrl">
-          <t-input v-model="formData.systemUrl" :style="{ width: '480px' }" placeholder="请输入系统描述" />
+          <t-input v-model="formData.systemUrl" placeholder="请输入链接地址" />
         </t-form-item>
         <t-form-item label="负责人姓名" name="principalName">
-          <t-input v-model="formData.principalName" :style="{ width: '480px' }" placeholder="请输入系统描述" />
+          <t-input v-model="formData.principalName" placeholder="请输入负责人姓名" />
         </t-form-item>
         <t-form-item label="负责人手机号" name="principalPhone">
-          <t-input v-model="formData.principalPhone" :style="{ width: '480px' }" placeholder="请输入系统描述" />
+          <t-input v-model="formData.principalPhone" placeholder="请输入负责人手机号" />
         </t-form-item>
         <t-form-item label="系统类型" name="type">
-          <t-select v-model="formData.systemTag" clearable :style="{ width: '480px' }">
+          <t-select v-model="formData.systemTag" clearable>
             <t-option v-for="(item, index) in SELECT_OPTIONS" :key="index" :value="item.value" :label="item.label">
               {{ item.label }}
             </t-option>
@@ -38,7 +38,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, watchEffect } from 'vue';
+import { onUpdated, ref, watch, watchEffect } from 'vue';
 import { MessagePlugin, FormRule, SubmitContext, Data } from 'tdesign-vue-next';
 import { SystemModel } from '@/api/model/system';
 import { addSystem, editSystem } from '@/api/system';
@@ -72,8 +72,13 @@ watchEffect(() => {
   title.value = !props.isEdit ? '新增系统' : '编辑系统';
 });
 
+onUpdated(() => {
+  form.value?.clearValidate();
+});
+
 const formVisible = ref(false);
 const formData = ref(null);
+const form = ref(null);
 formData.value = !props.isEdit ? { ...INITIAL_DATA } : { ...props.data };
 
 const onSubmit = async ({ validateResult, firstError }: SubmitContext<Data>) => {
@@ -126,7 +131,18 @@ watch(
   },
 );
 
+const validatePhone = (val) => {
+  const reg = /^1[3456789]\d{9}$/;
+  if (val && !reg.test(val)) {
+    return false;
+  }
+  return true;
+};
+
 const rules: Record<string, FormRule[]> = {
-  name: [{ required: true, message: '请输入系统名称', type: 'error' }],
+  systemName: [{ required: true, message: '请输入系统名称', type: 'error', trigger: 'blur' }],
+  systemIcon: [{ required: true, message: '请输入系统图标', type: 'error', trigger: 'blur' }],
+  systemUrl: [{ required: true, message: '请输入系统链接地址', type: 'error', trigger: 'blur' }],
+  principalPhone: [{ validator: validatePhone, trigger: 'blur', message: '请输入正确的手机号码', type: 'error' }],
 };
 </script>

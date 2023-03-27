@@ -2,16 +2,20 @@
   <div>
     <div class="list-card-operation">
       <t-button @click="handleAddSystem"> 新建系统 </t-button>
-      <div class="search-input">
-        <t-input v-model="searchValue" placeholder="请输入你需要搜索的内容" clearable>
+      <div class="search-input flex items-center">
+        <t-input v-model="searchValue" placeholder="请输入你需要搜索的内容" @enter="onSearch" @change="onSearch">
           <template #suffix-icon>
             <search-icon v-if="searchValue === ''" size="var(--td-comp-size-xxxs)" />
           </template>
         </t-input>
+        <t-button theme="primary" class="ml-2" @click="refresh">
+          <template #icon><refresh-icon size="26px" /></template>
+          重置
+        </t-button>
       </div>
     </div>
 
-    <dialog-form v-model:visible="formDialogVisible" :is-edit="isEdit" :data="formData" />
+    <dialog-form v-model:visible="formDialogVisible" :is-edit="isEdit" :data="formData" @change="fetchData" />
 
     <template v-if="pagination.total > 0 && !dataLoading">
       <div class="list-card-items">
@@ -32,6 +36,7 @@
               @delete-item="handleDeleteItem"
               @manage-product="handleManageProduct"
               @click="clickTap(system)"
+              @refresh="fetchData"
             />
           </t-col>
         </t-row>
@@ -65,12 +70,13 @@
 <script lang="ts">
 export default {
   name: 'ListCard',
+  components: { RefreshIcon },
 };
 </script>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { SearchIcon } from 'tdesign-icons-vue-next';
+import { RefreshIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import ItemCard from '@/components/item-card/index.vue';
 import DialogForm from './components/DialogForm.vue';
@@ -86,10 +92,15 @@ const isEdit = ref(false);
 const clickTap = (system: SystemModel) => {
   console.log('first', system);
 };
+const searchParams = ref({
+  systemName: '',
+});
 const fetchData = async () => {
+  dataLoading.value = true;
+  pagination.value.total = 0;
   try {
     const { page, pageSize } = pagination.value;
-    const { list, total } = await getSystemList({ page, pageSize });
+    const { list, total } = await getSystemList({ page, pageSize, ...searchParams.value });
     systemList.value = list;
     pagination.value = {
       ...pagination.value,
@@ -102,8 +113,16 @@ const fetchData = async () => {
   }
 };
 
+const refresh = () => {
+  searchParams.value = {
+    systemName: '',
+  };
+  searchValue.value = '';
+  fetchData();
+};
+
 const confirmBody = computed(() =>
-  deleteSystem.value ? `确认删除后${deleteSystem.value.name}的所有系统信息将被清空, 且无法恢复` : '',
+  deleteSystem.value ? `确认删除后${deleteSystem.value.systemName}的所有系统信息将被清空, 且无法恢复` : '',
 );
 
 onMounted(() => {
@@ -143,6 +162,11 @@ const handleManageProduct = (system) => {
   isEdit.value = true;
   formDialogVisible.value = true;
   formData.value = { ...system };
+};
+
+const onSearch = (e) => {
+  searchParams.value.systemName = e;
+  fetchData();
 };
 </script>
 

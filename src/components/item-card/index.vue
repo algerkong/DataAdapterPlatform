@@ -8,9 +8,10 @@
       </t-avatar>
     </template>
     <template #status>
-      <t-tag :theme="item.isOnline ? 'success' : 'default'" :disabled="!item.isOnline">{{
-        item.isOnline ? '已启用' : '已停用'
-      }}</t-tag>
+      <t-popconfirm :content="item.isOnline ? '确认停用吗' : '确认启用吗'" @confirm="clickOnline">
+        <t-tag v-if="item.isOnline" theme="success">已启用</t-tag>
+        <t-tag v-else theme="primary" variant="outline">已停用</t-tag>
+      </t-popconfirm>
     </template>
     <template #content>
       <p class="list-card-item_detail--name">{{ item.systemName }}</p>
@@ -20,11 +21,6 @@
       <div class="flex justify-between items-center">
         <t-avatar-group cascading="left-up" :max="2">
           <t-avatar>{{ item.principalName }}</t-avatar>
-          <t-avatar
-            ><template #icon>
-              <add-icon />
-            </template>
-          </t-avatar>
         </t-avatar-group>
         <div>
           <t-button size="small" ghost>数据共享</t-button>
@@ -33,21 +29,7 @@
       </div>
     </template>
     <template #actions>
-      <t-dropdown
-        trigger="click"
-        :options="[
-          {
-            content: '管理',
-            value: 'manage',
-            onClick: () => handleClickManage(item),
-          },
-          {
-            content: '删除',
-            value: 'delete',
-            onClick: () => handleClickDelete(item),
-          },
-        ]"
-      >
+      <t-dropdown trigger="click" :options="dropdownOptions">
         <t-button theme="default" shape="square" variant="text" @click.stop>
           <more-icon />
         </t-button>
@@ -56,23 +38,55 @@
   </t-card>
 </template>
 <script setup lang="ts">
-import { PropType } from 'vue';
-import { ShopIcon, MoreIcon, AddIcon } from 'tdesign-icons-vue-next';
+import { PropType, ref } from 'vue';
+import { ShopIcon, MoreIcon } from 'tdesign-icons-vue-next';
+import { MessagePlugin } from 'tdesign-vue-next';
 import { SystemModel } from '@/api/model/system';
-// eslint-disable-next-line
+import { systemOn, systemOff } from '@/api/system';
+
 const props = defineProps({
   item: {
     type: Object as PropType<SystemModel>,
   },
 });
-const emit = defineEmits(['manage-product', 'delete-item', 'item-click']);
 
-const handleClickManage = (product: SystemModel) => {
-  emit('manage-product', product);
+const dropdownOptions = ref([
+  {
+    content: '管理',
+    value: 'manage',
+    onClick: () => handleClickManage(),
+  },
+  {
+    content: '删除',
+    value: 'delete',
+    onClick: () => handleClickDelete(),
+  },
+]);
+// 刷新
+const emit = defineEmits(['manage-product', 'delete-item', 'item-click', 'refresh']);
+
+const handleClickManage = () => {
+  emit('manage-product', props.item);
 };
 
-const handleClickDelete = (product: SystemModel) => {
-  emit('delete-item', product);
+const handleClickDelete = () => {
+  if (props.item.isOnline) {
+    MessagePlugin.error('请先停用该系统');
+    return;
+  }
+  emit('delete-item', props.item);
+};
+
+const clickOnline = async () => {
+  const { isOnline, id } = props.item;
+  if (isOnline) {
+    await systemOff(id);
+    MessagePlugin.success('停用成功');
+  } else {
+    await systemOn(id);
+    MessagePlugin.success('启用成功');
+  }
+  emit('refresh');
 };
 </script>
 
