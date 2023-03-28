@@ -2,7 +2,7 @@
   <t-card :bordered="false" hover-shadow>
     <div>
       <t-button @click="clickReturn">返回系统列表</t-button>
-      <t-button @click="addClickdatas">新增数据共享</t-button>
+      <t-button @click="addClickdatas(true)">新增数据共享</t-button>
     </div>
 
     <div style="width: 100%; margin-top: 15px">
@@ -22,8 +22,11 @@
           </t-tag>
         </template>
 
-        <template #operates="">
-          <t-button theme="default" variant="text">编辑</t-button>
+        <template #operates="{ row }">
+          <t-button theme="default" variant="text" @click="editClickdatas(false)">
+            {{ row.isOnline ? '下线' : '上线' }}
+          </t-button>
+          <t-button theme="default" variant="text" @click="editClickdatas(false)">编辑</t-button>
           <t-button theme="default" variant="text">删除</t-button>
         </template>
       </t-table>
@@ -41,13 +44,39 @@
 
     <t-dialog
       v-model:visible="visible"
-      header="对话框标题"
+      :header="status ? '新增' : '编辑'"
       body="对话框内容"
       attach="body"
       :confirm-on-enter="true"
       :on-close="close"
       :on-confirm="onConfirmAnother"
-    />
+      width="800px"
+    >
+      <t-form ref="form" :data="formData" :colon="true" label-align="right" label-width="150px">
+        <t-form-item label="数据共享项目名称  " name="taskName">
+          <t-input v-model="formData.taskName" placeholder="请输入内容" @enter="onEnter"></t-input>
+        </t-form-item>
+
+        <t-form-item label="数据规范" name="college">
+          <t-select v-model="formData.dataStandardId" class="demo-select-base" clearable filterable>
+            <t-option v-for="item in Dataspecification" :key="item.id" :value="item.id" :label="item.standardName">
+              {{ item.standardName }}
+            </t-option>
+          </t-select>
+        </t-form-item>
+
+        <t-form-item label="任务执行频率(毫秒)" name="taskFrequency">
+          <t-input v-model="formData.taskFrequency" placeholder="请输入数字" />
+        </t-form-item>
+
+        <t-form-item label="推送方式" name="college">
+          <t-select v-model="formData.transmissionType" class="demo-select-base" clearable filterable>
+            <t-option value="0" label="API推送">API推送</t-option>
+            <t-option value="1" label="DB推送">DB推送</t-option>
+          </t-select>
+        </t-form-item>
+      </t-form>
+    </t-dialog>
   </t-card>
 </template>
 
@@ -56,21 +85,32 @@ import { ref, reactive, toRefs } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { ErrorCircleFilledIcon, CheckCircleFilledIcon, CloseCircleFilledIcon } from 'tdesign-icons-vue-next';
 import { BaseTableColumns, MessagePlugin } from 'tdesign-vue-next';
-import { getDataSharingList } from '@/api/dataSharing';
+import { getDataSharingList, getDataSpecification } from '@/api/dataSharing';
 
 const Route = useRoute();
 const Router = useRouter();
 const total = ref(0);
 const id = ref(Route.params.id);
+const visible = ref(false);
+const status = ref(null);
+const Dataspecification = ref([]);
+// const formData = reactive({
+//   name: '',
+// });
 const lists = reactive({
   data: [],
+  formData: {
+    taskName: '',
+    dataStandardId: '',
+    taskFrequency: '',
+    transmissionType: '',
+  },
 });
-const { data } = toRefs(lists);
+const { data, formData } = toRefs(lists);
 const pages = reactive({
   current: 1,
   pageSize: 10,
 });
-const visible = true;
 const columns: BaseTableColumns = [
   {
     colKey: 'applicant',
@@ -92,11 +132,6 @@ const columns: BaseTableColumns = [
     title: '推送方式',
     align: 'center',
   },
-  {
-    title: '是否在线',
-    colKey: 'email',
-    align: 'center',
-  },
   { colKey: 'createTime', title: '申请时间', align: 'center' },
   { colKey: 'operates', title: '操作', align: 'center' },
 ];
@@ -115,14 +150,28 @@ const clickReturn = () => {
   Router.back();
 };
 
-const addClickdatas = () => {
-  console.log(111);
+const addClickdatas = async (value: any) => {
+  status.value = value;
+  visible.value = true;
+  await getDataSpecification({
+    page: pages.current,
+    pageSize: 999,
+  }).then((res: any) => {
+    Dataspecification.value = res.list;
+  });
+};
+const editClickdatas = (value: any) => {
+  status.value = value;
 };
 const onConfirmAnother = () => {
-  console.log(111);
+  visible.value = false;
 };
 const close = () => {
-  console.log(111);
+  visible.value = false;
+};
+
+const onEnter = (_, { e }) => {
+  e.preventDefault();
 };
 
 const onPageSizeChange = (size) => {
