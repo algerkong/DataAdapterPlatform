@@ -72,8 +72,6 @@
         :hover="hover"
         :stripe="true"
         :loading="dataLoading"
-        :header-affixed-top="headerAffixedTop"
-        @change="rehandleChange"
       >
         <template #moduleId="slotProps">
           <t-tag theme="success" variant="light">{{
@@ -104,7 +102,7 @@
         @current-change="onCurrentChange"
       />
 
-      <t-dialog v-model:visible="addVisible" header="新建标准" width="600px" :footer="false">
+      <t-dialog v-model:visible="addVisible" :header="dialogTitle" width="600px" :footer="false">
         <t-form
           ref="addForm"
           :data="addFormData"
@@ -159,26 +157,14 @@
 </template>
 <script setup lang="ts">
 import { ref, computed, onMounted, watchEffect } from 'vue';
-import {
-  Data,
-  DialogPlugin,
-  Message,
-  MessagePlugin,
-  PrimaryTableCol,
-  SubmitContext,
-  TableRowData,
-} from 'tdesign-vue-next';
-import { useSettingStore } from '@/store';
-import { prefix } from '@/config/global';
+import { Data, DialogPlugin, FormInstanceFunctions, MessagePlugin, SubmitContext } from 'tdesign-vue-next';
 
 import { CONTRACT_TYPE_OPTIONS } from '@/constants';
 import { addDataStandard, delDataStandard, getDataStandardList, editDataStandard } from '@/api/dataStandard';
 import { useRouter } from 'vue-router';
 import { dataStandardModel } from '@/api/model/dataStandardModel';
 import { ADD_FORM, ADD_FROM_RULES, TRANSMISSON_MODE, MODULE, COLUMNS } from './constants';
-import SideNav from '@/layouts/components/SideNav.vue';
 
-const store = useSettingStore();
 const router = useRouter();
 
 const searchForm = {
@@ -208,7 +194,6 @@ const onCurrentChange = (page: number) => {
   pagination.value.page = page;
   fetchData();
 };
-const confirmVisible = ref(false);
 
 const data = ref([]);
 
@@ -266,37 +251,32 @@ const isEdit = computed(() => {
   return !!addFormData.value.id;
 });
 
+const dialogTitle = computed(() => {
+  return isEdit.value ? '编辑数据标准' : '新增数据标准';
+});
+
 const handleClickEdit = async ({ row }) => {
   addVisible.value = true;
   addFormData.value = { ...row };
 };
 
-const rehandleChange = (changeParams, triggerAndData) => {
-  console.log('统一Change', changeParams, triggerAndData);
-};
 const rehandleClickOp = ({ text, row }) => {
   router.push({
     path: `/dataStandard/add/${row.id}`,
   });
 };
 
-const headerAffixedTop = computed(
-  () =>
-    ({
-      offsetTop: store.isUseTabsRouter ? 48 : 0,
-      container: `.${prefix}-layout`,
-    } as any), // TO BE FIXED
-);
 const addVisible = ref(false);
 const addFormData = ref<dataStandardModel>({ ...ADD_FORM });
-
+const addForm = ref<FormInstanceFunctions>(null);
 watchEffect(() => {
   if (!addVisible.value) {
     addFormData.value = { ...ADD_FORM };
+    addForm.value?.clearValidate();
   }
 });
 
-const onConfirmAdd = async ({ validateResult, firstError }: SubmitContext<Data>) => {
+const onConfirmAdd = async ({ firstError }: SubmitContext<Data>) => {
   if (firstError) {
     MessagePlugin.warning(firstError);
     return;

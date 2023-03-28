@@ -32,14 +32,14 @@ export default [
       {
         path: '',
         name: 'dataStandardIndex',
-        component: () => import('@/pages/dataSpecification/index.vue'),
+        component: () => import('@/pages/dataStandard/index.vue'),
         meta: { title: '数据标准' },
       },
       {
         path: '/dataStandard/add/:id',
         name: 'dataStandardAdd',
-        component: () => import('@/pages/dataSpecification/add/index.vue'),
-        meta: { title: '添加数据标准' },
+        component: () => import('@/pages/dataStandard/add/index.vue'),
+        meta: { title: '添加数据结构' },
       },
     ],
   },
