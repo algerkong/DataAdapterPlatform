@@ -16,7 +16,6 @@
                 image: '请选择图片',
               },
             }"
-            @success="handleSuccess"
           ></t-upload>
         </t-form-item>
         <t-form-item label="系统名称" name="systemName">
@@ -56,7 +55,6 @@ import { MessagePlugin, FormRule, SubmitContext, Data, SuccessContext, UploadFil
 import { SystemModel } from '@/api/model/system';
 import { addSystem, editSystem } from '@/api/system';
 import proxy from '@/config/proxy';
-// import { AddIcon } from 'tdesign-icons-vue-next';
 
 const INITIAL_DATA: SystemModel = {
   systemIcon: '',
@@ -95,29 +93,6 @@ const formVisible = ref(false);
 const formData = ref<SystemModel>(null);
 const form = ref(null);
 formData.value = !props.isEdit ? { ...INITIAL_DATA } : { ...props.data };
-
-// 打开文件选择 选择图片 png jpg svg
-// const chooseIcon = () => {
-//   const input = document.createElement('input');
-//   input.type = 'file';
-//   input.accept = '.jpg,.jpeg,.png,.svg';
-//   input.onchange = (e) => {
-//     const file = (e.target as HTMLInputElement).files?.[0];
-//     if (file) {
-//       const reader = new FileReader();
-//       reader.readAsDataURL(file);
-//       reader.onload = (e) => {
-//         const base64 = e.target?.result as string;
-//         formData.value.systemIcon = base64;
-//       };
-//     }
-//   };
-//   input.click();
-// };
-
-const handleSuccess = (context: SuccessContext) => {
-  console.log('context', context);
-};
 
 const onSubmit = async ({ validateResult, firstError }: SubmitContext<Data>) => {
   if (!firstError) {
@@ -193,16 +168,11 @@ const rules: Record<string, FormRule[]> = {
   principalPhone: [{ validator: validatePhone, trigger: 'blur', message: '请输入正确的手机号码', type: 'error' }],
 };
 
-watchEffect(() => {
-  console.log('formData,,,,,', formData.value);
-});
-
 const formatImgResponse = (res) => {
   formData.value = {
     ...formData.value,
     systemIcon: res.data,
   };
-  console.log('formData1111111111', formData.value);
   return { name: 'file', url: `${proxy.baseUrl}/images/${res.data}` };
 };
 </script>

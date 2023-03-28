@@ -35,6 +35,7 @@
               :item="system"
               @delete-item="handleDeleteItem"
               @manage-product="handleManageProduct"
+              @refresh="fetchData"
             />
           </t-col>
         </t-row>
@@ -84,9 +85,13 @@ const isEdit = ref(false);
 const searchParams = ref({
   systemName: '',
 });
+
 const fetchData = async () => {
-  dataLoading.value = true;
-  pagination.value.total = 0;
+  // dataLoading.value = true;
+  pagination.value = {
+    ...pagination.value,
+    total: 0,
+  };
   try {
     const { page, pageSize } = pagination.value;
     const { list, total } = await getSystemList({ page, pageSize, ...searchParams.value });

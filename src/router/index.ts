@@ -81,4 +81,13 @@ const router = createRouter({
   },
 });
 
+// 路由守卫
+router.beforeEach((to, from, next) => {
+  // 设置页面标题
+  if (to.meta && to.meta.title) {
+    document.title = to.meta.title as string;
+  }
+  next();
+});
+
 export default router;

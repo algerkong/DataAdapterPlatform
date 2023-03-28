@@ -5,28 +5,31 @@
         class="rounded-full bg-blue-100 flex justify-center items-center ring-4 overflow-hidden"
         style="width: 60px; height: 60px"
       >
-        <img v-if="item.systemIcon" class="w-full h-full" :src="`${proxy.baseUrl}/images/${item.systemIcon}`" />
+        <img
+          v-if="systemItem.systemIcon"
+          class="w-full h-full"
+          :src="`${proxy.baseUrl}/images/${systemItem.systemIcon}`"
+        />
         <shop-icon v-else class="text-gray-400 text-3xl" />
       </div>
     </template>
     <template #status>
-      <t-popconfirm :content="item.isOnline ? '确认停用吗' : '确认启用吗'" @confirm="clickOnline">
-        <t-tag v-if="item.isOnline" theme="success">已启用</t-tag>
+      <t-popconfirm :content="systemItem.isOnline ? '确认停用吗' : '确认启用吗'" @confirm="clickOnline">
+        <t-tag v-if="systemItem.isOnline" theme="success">已启用</t-tag>
         <t-tag v-else theme="primary" variant="outline">已停用</t-tag>
       </t-popconfirm>
     </template>
     <template #content>
-      <p class="list-card-item_detail--name">{{ item.systemName }}</p>
-      <p class="list-card-item_detail--desc">{{ item.remark }}</p>
+      <p class="list-card-item_detail--name">{{ systemItem.systemName }}</p>
+      <p class="list-card-item_detail--desc">{{ systemItem.remark }}</p>
     </template>
     <template #footer>
       <div class="flex justify-between items-center">
         <t-avatar-group cascading="left-up" :max="2">
-          <t-avatar>{{ item.principalName }}</t-avatar>
+          <t-avatar>{{ systemItem.principalName }}</t-avatar>
         </t-avatar-group>
         <div>
           <t-button size="small" ghost @click.stop="clickdataSharing">数据共享</t-button>
-          <t-button size="small" ghost theme="success" @click="clickdataSpecification">数据规范</t-button>
         </div>
       </div>
     </template>
@@ -41,7 +44,7 @@
 </template>
 <script setup lang="ts">
 import { MessagePlugin } from 'tdesign-vue-next';
-import { PropType, ref } from 'vue';
+import { PropType, ref, watchEffect } from 'vue';
 import { ShopIcon, MoreIcon } from 'tdesign-icons-vue-next';
 import { useRouter } from 'vue-router';
 import { SystemModel } from '@/api/model/system';
@@ -52,6 +55,11 @@ const props = defineProps({
   item: {
     type: Object as PropType<SystemModel>,
   },
+});
+
+const systemItem = ref<SystemModel>(null);
+watchEffect(() => {
+  systemItem.value = props.item;
 });
 
 const dropdownOptions = ref([
@@ -97,15 +105,6 @@ const Router = useRouter();
 const clickdataSharing = () => {
   Router.push({
     path: `/system/dataSharing/${props.item.id}`,
-  });
-};
-
-const clickdataSpecification = () => {
-  Router.push({
-    path: '/system/dataSpecification',
-    params: {
-      id: props.item.id,
-    },
   });
 };
 </script>
