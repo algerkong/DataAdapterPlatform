@@ -2,6 +2,8 @@ import { request } from '@/utils/request';
 
 const Api = {
   dataSharing: '/share_data',
+  dataStandard: '/data_standard',
+  addDates: '/share_data',
 };
 
 export const getDataSharingList = (parms: any) => {
@@ -11,16 +13,17 @@ export const getDataSharingList = (parms: any) => {
   });
 };
 
-export const addSystem = (data: any) => {
-  return request.post({
-    url: Api.dataSharing,
-    data,
+export const getDataSpecification = (params: any) => {
+  return request.get({
+    url: Api.dataStandard,
+    params,
   });
 };
 
-export const delSystem = (id: string) => {
+export const postaddDate = (data: string) => {
   return request.delete({
-    url: `${Api.dataSharing}/${id}`,
+    url: Api.addDates,
+    data,
   });
 };
 
