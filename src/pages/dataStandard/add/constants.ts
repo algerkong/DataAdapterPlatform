@@ -1,4 +1,17 @@
-import { PrimaryTableCol, TableRowData } from 'tdesign-vue-next';
+import { FormRule, PrimaryTableCol, TableRowData } from 'tdesign-vue-next';
+
+export const FIELD_TYPE_OPTIONS = [
+  { label: '字符串', value: 'string' },
+  { label: '整数', value: 'int' },
+  { label: '浮点数', value: 'float' },
+  { label: '布尔', value: 'boolean' },
+  { label: '日期', value: 'date' },
+  { label: '时间', value: 'time' },
+  { label: '日期时间', value: 'datetime' },
+  { label: '数组', value: 'array' },
+  { label: '对象', value: 'object' },
+];
+
 export const DATA_STRUCTURE_COLUMN: PrimaryTableCol<TableRowData>[] = [
   {
     title: '字段名称',
@@ -58,26 +71,19 @@ export const DATA_STRUCTURE_COLUMN: PrimaryTableCol<TableRowData>[] = [
 
 export const ADD_DATA_STRUCTURE_FROM = {
   fieldName: '',
-  fieldType: '',
+  fieldType: 'string',
   fieldDescription: '',
-  fieldLength: null,
+  fieldLength: 255,
   fieldDefaultValue: '',
-  isUnique: 0,
-  outOfUse: 0,
+  isUnique: 1,
+  outOfUse: 1,
 };
 
-export const ADD_DATA_STRUCTURE_RULES = {
+export const ADD_DATA_STRUCTURE_RULES: Record<string, FormRule[]> = {
   fieldName: [
     {
       required: true,
       message: '请输入字段名称',
-      trigger: 'blur',
-    },
-  ],
-  fieldType: [
-    {
-      required: true,
-      message: '请输入字段类型',
       trigger: 'blur',
     },
   ],

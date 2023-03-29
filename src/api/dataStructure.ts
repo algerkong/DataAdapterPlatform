@@ -12,8 +12,8 @@ export const getDataStructureList = (params: RequestListParams) => {
 };
 
 export const editDataStructure = (id: string, data: dataStructureModel) => {
-  return request.put<dataStructureModel>({
-    url: Api + '/' + id,
+  return request.patch<dataStructureModel>({
+    url: `${Api}/${id}`,
     data,
   });
 };
@@ -27,6 +27,6 @@ export const addDataStructure = (data: dataStructureModel) => {
 
 export const deleteDataStructure = (id: string) => {
   return request.delete({
-    url: Api + '/' + id,
+    url: `${Api}/${id}`,
   });
 };
