@@ -1,5 +1,5 @@
 export interface BaseListModel<T> {
-  list: Array<T>;
+  list: T[];
   total: number;
 }
 

@@ -81,7 +81,7 @@ const handleClickManage = () => {
 };
 
 const handleClickDelete = () => {
-  if (props.item.isOnline) {
+  if (systemItem.value.isOnline) {
     MessagePlugin.error('请先停用该系统');
     return;
   }
@@ -89,7 +89,7 @@ const handleClickDelete = () => {
 };
 
 const clickOnline = async () => {
-  const { isOnline, id } = props.item;
+  const { isOnline, id } = systemItem.value;
   if (isOnline) {
     await systemOff(id);
     MessagePlugin.success('停用成功');

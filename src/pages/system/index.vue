@@ -20,16 +20,7 @@
     <template v-if="pagination.total > 0 && !dataLoading">
       <div class="list-card-items">
         <t-row :gutter="[16, 16]">
-          <t-col
-            v-for="system in systemList.slice(
-              pagination.pageSize * (pagination.page - 1),
-              pagination.pageSize * pagination.page,
-            )"
-            :key="system.id"
-            :lg="4"
-            :xs="6"
-            :xl="3"
-          >
+          <t-col v-for="system in systemList" :key="system.id" :lg="4" :xs="6" :xl="3">
             <item-card
               class="list-card-item"
               :item="system"
@@ -87,7 +78,7 @@ const searchParams = ref({
 });
 
 const fetchData = async () => {
-  // dataLoading.value = true;
+  dataLoading.value = true;
   pagination.value = {
     ...pagination.value,
     total: 0,
