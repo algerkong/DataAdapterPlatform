@@ -20,7 +20,7 @@
     </div>
 
     <div style="width: 100%; margin-top: 15px">
-      <t-table :data="data" :columns="columns" row-key="property" :loading="dataLoading" @row-click="rowclick">
+      <t-table :data="data" :columns="columns" row-key="property" :loading="dataLoading" stripe @row-click="rowclick">
         <!-- 插槽方式 自定义单元格， colKey 的值默认为插槽名称  -->
         <template #status="{ row }">
           <t-tag theme="primary" variant="light">
@@ -30,12 +30,12 @@
 
         <template #operates="{ row }">
           <t-popconfirm :content="row.isOnline ? '确认下线吗' : '确认上线吗'" @confirm="clickStatus(row)">
-            <t-button theme="default" variant="text">
+            <t-button theme="primary" variant="text">
               {{ row.isOnline ? '上线' : '下线' }}
             </t-button>
           </t-popconfirm>
-          <t-button theme="default" variant="text" @click="editClickdatas(false)">编辑</t-button>
-          <t-button theme="default" variant="text" @click="deleteClick(row)">删除</t-button>
+          <t-button theme="primary" variant="text" @click="editClickdatas(false)">编辑</t-button>
+          <t-button theme="primary" variant="text" @click="deleteClick">删除</t-button>
         </template>
       </t-table>
     </div>
@@ -107,6 +107,7 @@ import {
   reviseStatuson,
   reviseStatusoff,
   deleteDatas,
+  reviseDates,
 } from '@/api/dataSharing';
 
 const Route = useRoute();
@@ -121,7 +122,6 @@ const status = ref(null);
 const Dataspecification = ref([]);
 const searchValue = ref('');
 const dataLoading = ref(true);
-
 const FORMDATA_VALUE = {
   taskName: '',
   dataStandardId: '',
@@ -132,14 +132,11 @@ const lists = reactive({
   data: [],
   formData: { ...FORMDATA_VALUE },
 });
-const { data } = toRefs(lists);
-const formData = ref({ ...FORMDATA_VALUE });
+const { data, formData } = toRefs(lists);
+// const formData = ref({ ...FORMDATA_VALUE });
 const pages = reactive({
   current: 1,
   pageSize: 10,
-});
-watchEffect(() => {
-  console.log(formData.value, '1111111');
 });
 const rules: Record<string, FormRule[]> = {
   taskName: [{ required: true, message: '请输入数据共享名称', type: 'error', trigger: 'blur' }],
@@ -156,14 +153,12 @@ const columns: BaseTableColumns = [
     title: '任务名称',
     // type-slot-name 会被用于自定义单元格的插槽名称
     cell: 'type-slot-name',
-    width: 120,
     align: 'center',
   },
   {
     title: '传输类型',
     // 没有 cell 的情况下， platform 会被用作自定义单元格的插槽名称
     colKey: 'status',
-    width: 120,
     align: 'center',
   },
   {
@@ -204,12 +199,14 @@ const addClickdatas = (value: any) => {
   gainlists();
 };
 const onSearch = async () => {
+  dataLoading.value = true;
   await getDataSharingList({
     page: pages.current,
     pageSize: pages.pageSize,
     taskName: searchValue.value,
   }).then((res) => {
     data.value = res.list;
+    dataLoading.value = false;
   });
 };
 const refresh = () => {
@@ -221,9 +218,8 @@ const editClickdatas = (value: any) => {
   visible.value = true;
   gainlists();
 };
-const deleteClick = (value) => {
+const deleteClick = () => {
   confirmVisible.value = true;
-  dataSharedTaskId.value = value.id;
 };
 const onCancel = () => {
   confirmVisible.value = false;
@@ -233,8 +229,8 @@ const onConfirmDelete = async () => {
   await deleteDatas(dataSharedTaskId.value).then((res) => {
     MessagePlugin.success(res.message);
     confirmVisible.value = false;
+    getLists();
   });
-  getLists();
 };
 const clickStatus = async (value) => {
   if (value.isOnline) {
@@ -251,21 +247,34 @@ const clickStatus = async (value) => {
 };
 const rowclick = (value: any) => {
   formData.value = { ...value.row };
+  dataSharedTaskId.value = value.row.id;
 };
-
 const onSubmit = async ({ validateResult, firstError }) => {
   if (validateResult === true) {
-    await postaddDate({
-      system: id.value,
-      taskName: formData.value.taskName,
-      dataStandardId: formData.value.dataStandardId,
-      transmissionType: formData.value.transmissionType,
-      taskFrequency: formData.value.taskFrequency,
-    }).then((res) => {
-      MessagePlugin.success(res.message);
-      visible.value = false;
-      getLists();
-    });
+    if (status.value) {
+      await postaddDate({
+        system: id.value,
+        taskName: formData.value.taskName,
+        dataStandardId: formData.value.dataStandardId,
+        transmissionType: formData.value.transmissionType,
+        taskFrequency: formData.value.taskFrequency,
+      }).then((res) => {
+        MessagePlugin.success(res.message);
+        visible.value = false;
+        getLists();
+      });
+    } else {
+      await reviseDates(dataSharedTaskId.value, {
+        taskName: formData.value.taskName,
+        dataStandardId: formData.value.dataStandardId,
+        transmissionType: formData.value.transmissionType,
+        taskFrequency: formData.value.taskFrequency,
+      }).then(() => {
+        MessagePlugin.success('修改成功');
+        visible.value = false;
+        getLists();
+      });
+    }
   } else {
     console.log('Errors: ', validateResult);
     MessagePlugin.warning(firstError);

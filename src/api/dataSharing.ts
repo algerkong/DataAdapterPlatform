@@ -43,3 +43,10 @@ export const deleteDatas = (id: string) => {
     url: `${Api.dataSharing}/${id}`,
   });
 };
+
+export const reviseDates = (id: string, data) => {
+  return request.patch({
+    url: `${Api.dataSharing}/${id}`,
+    data,
+  });
+};
