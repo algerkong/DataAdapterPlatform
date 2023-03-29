@@ -50,25 +50,20 @@
       />
     </div>
 
-    <t-dialog v-model:visible="visible" :header="status ? '新增' : '编辑'" width="700px" :footer="false">
-      <t-form
-        ref="form"
-        :data="formData"
-        :rules="rules"
-        :colon="true"
-        label-align="right"
-        label-width="150px"
-        @submit="onSubmit"
-      >
+    <t-dialog v-model:visible="visible" colon :header="status ? '新增' : '编辑'" width="700px" :footer="false">
+      <t-form ref="form" :data="formData" :rules="rules" label-align="right" label-width="150px" @submit="onSubmit">
         <t-form-item label="数据共享项目名称  " name="taskName">
           <t-input v-model="formData.taskName" placeholder="请输入数据共享名称"></t-input>
         </t-form-item>
 
         <t-form-item label="数据规范" name="dataStandardId">
-          <t-select v-model="formData.dataStandardId" class="demo-select-base" clearable filterable>
-            <t-option v-for="item in Dataspecification" :key="item.id" :value="item.id" :label="item.standardName">
-              {{ item.standardName }}
-            </t-option>
+          <t-select v-model="formData.dataStandardId" class="demo-select-base">
+            <t-option
+              v-for="item in Dataspecification"
+              :key="item.id"
+              :value="item.id"
+              :label="item.standardName"
+            ></t-option>
           </t-select>
         </t-form-item>
 
@@ -77,7 +72,7 @@
         </t-form-item>
 
         <t-form-item label="推送方式" name="transmissionType">
-          <t-select v-model="formData.transmissionType" class="demo-select-base" clearable filterable>
+          <t-select v-model="formData.transmissionType" class="demo-select-base">
             <t-option value="0" label="API推送">API推送</t-option>
             <t-option value="1" label="DB推送">DB推送</t-option>
           </t-select>
@@ -104,7 +99,7 @@
 import { ref, reactive, toRefs, watchEffect } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { SearchIcon, RefreshIcon } from 'tdesign-icons-vue-next';
-import { BaseTableColumns, MessagePlugin } from 'tdesign-vue-next';
+import { BaseTableColumns, FormRule, MessagePlugin } from 'tdesign-vue-next';
 import {
   getDataSharingList,
   getDataSpecification,
@@ -126,21 +121,27 @@ const status = ref(null);
 const Dataspecification = ref([]);
 const searchValue = ref('');
 const dataLoading = ref(true);
+
+const FORMDATA_VALUE = {
+  taskName: '',
+  dataStandardId: '',
+  taskFrequency: '',
+  transmissionType: '',
+};
 const lists = reactive({
   data: [],
-  formData: {
-    taskName: '',
-    dataStandardId: '',
-    taskFrequency: '',
-    transmissionType: '',
-  },
+  formData: { ...FORMDATA_VALUE },
 });
-const { data, formData } = toRefs(lists);
+const { data } = toRefs(lists);
+const formData = ref({ ...FORMDATA_VALUE });
 const pages = reactive({
   current: 1,
   pageSize: 10,
 });
-const rules: any = {
+watchEffect(() => {
+  console.log(formData.value, '1111111');
+});
+const rules: Record<string, FormRule[]> = {
   taskName: [{ required: true, message: '请输入数据共享名称', type: 'error', trigger: 'blur' }],
   taskFrequency: [{ required: true, message: '请输入执行任务毫秒', type: 'error', trigger: 'blur' }],
   transmissionType: [{ required: true, message: '请选择推送方式', type: 'error', trigger: 'blur' }],
@@ -272,10 +273,7 @@ const onSubmit = async ({ validateResult, firstError }) => {
 };
 watchEffect(() => {
   if (visible.value === false) {
-    formData.value.taskName = '';
-    formData.value.taskFrequency = '';
-    formData.value.transmissionType = '';
-    formData.value.dataStandardId = '';
+    formData.value = { ...FORMDATA_VALUE };
     form.value?.clearValidate();
   }
 });
