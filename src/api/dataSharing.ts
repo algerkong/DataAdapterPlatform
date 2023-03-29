@@ -3,7 +3,6 @@ import { request } from '@/utils/request';
 const Api = {
   dataSharing: '/share_data',
   dataStandard: '/data_standard',
-  addDates: '/share_data',
 };
 
 export const getDataSharingList = (parms: any) => {
@@ -20,16 +19,27 @@ export const getDataSpecification = (params: any) => {
   });
 };
 
-export const postaddDate = (data: string) => {
-  return request.delete({
-    url: Api.addDates,
+export const postaddDate: any = (data: string) => {
+  return request.post({
+    url: Api.dataSharing,
     data,
   });
 };
 
-export const editSystem = (id: string, data: any) => {
-  return request.patch({
+export const reviseStatuson = (id: string) => {
+  return request.post({
+    url: `${'/share_data/on'}/${id}`,
+  });
+};
+
+export const reviseStatusoff = (id: string) => {
+  return request.post({
+    url: `${'/share_data/off'}/${id}`,
+  });
+};
+
+export const deleteDatas = (id: string) => {
+  return request.delete({
     url: `${Api.dataSharing}/${id}`,
-    data,
   });
 };
