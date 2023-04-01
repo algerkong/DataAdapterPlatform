@@ -1,7 +1,7 @@
 export default {
   showFooter: true,
   isSidebarCompact: false,
-  showBreadcrumb: false,
+  showBreadcrumb: true,
   mode: 'light',
   layout: 'mix',
   splitMenu: true,
@@ -12,3 +12,17 @@ export default {
   showHeader: true,
   brandTheme: '#0052D9',
 };
+// export default {
+//   showFooter: true,
+//   isSidebarCompact: false,
+//   showBreadcrumb: true,
+//   mode: 'light',
+//   layout: 'top',
+//   splitMenu: true,
+//   isFooterAside: false,
+//   isSidebarFixed: true,
+//   isHeaderFixed: true,
+//   isUseTabsRouter: false,
+//   showHeader: true,
+//   brandTheme: '#0052D9',
+// };

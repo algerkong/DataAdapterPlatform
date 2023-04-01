@@ -1,48 +1,52 @@
 <template>
   <div class="list-common-table">
-    <t-form ref="form" :data="formData" :label-width="80" colon @reset="searchReset" @submit="fetchData">
+    <t-form ref="form" :data="searchFormData" :label-width="80" colon @reset="searchReset" @submit="fetchData">
       <t-row>
         <t-col :span="10">
           <t-row :gutter="[24, 24]">
             <t-col :span="3">
-              <t-form-item label="标准名称" name="standardName">
+              <t-form-item label="API名称" name="apiName">
                 <t-input
-                  v-model="formData.standardName"
+                  v-model="searchFormData.apiName"
                   class="form-item-content"
                   type="search"
-                  placeholder="请输入数据标准名称"
+                  placeholder="请输入API名称"
                   :style="{ minWidth: '134px' }"
                 />
               </t-form-item>
             </t-col>
             <t-col :span="3">
-              <t-form-item label="标准详情" name="descripition">
+              <t-form-item label="API地址" name="url">
                 <t-input
-                  v-model="formData.descripition"
+                  v-model="searchFormData.url"
                   class="form-item-content"
-                  placeholder="请输入标准详情"
+                  placeholder="请输入API地址"
                   :style="{ minWidth: '134px' }"
                 />
               </t-form-item>
             </t-col>
             <t-col :span="3">
-              <t-form-item label="模块ID" name="moduleId">
-                <t-input
-                  v-model="formData.moduleId"
-                  class="form-item-content"
-                  placeholder="请输入模块ID"
-                  :style="{ minWidth: '134px' }"
-                />
-              </t-form-item>
-            </t-col>
-            <t-col :span="3">
-              <t-form-item label="传输模式" name="moduleId">
+              <t-form-item label="请求方式" name="method">
                 <t-select
-                  v-model="formData.transmissionMode"
+                  v-model="searchFormData.method"
                   style="display: inline-block"
                   class="form-item-content"
-                  :options="CONTRACT_TYPE_OPTIONS"
-                  placeholder="请选择传输模式"
+                  :options="API_DISPOSE_METHOD"
+                  placeholder="请选择请求方式"
+                  @change="onMethodSelectChange"
+                />
+              </t-form-item>
+            </t-col>
+            <t-col :span="3">
+              <t-form-item label="参数类型" name="contentType">
+                <t-select
+                  v-model="searchContentType"
+                  style="display: inline-block"
+                  class="form-item-content"
+                  :options="apiDisposeContentType"
+                  placeholder="请选择请求内容类型"
+                  multiple
+                  :max="3"
                 />
               </t-form-item>
             </t-col>
@@ -58,12 +62,12 @@
 
     <div class="table-container">
       <div class="mt-4">
-        <t-button @click="toAdd">新建标准</t-button>
+        <t-button @click="toAdd">新建API配置</t-button>
       </div>
 
       <t-table
         :data="data"
-        :columns="COLUMNS"
+        :columns="API_DISPOSE_COLUMNS"
         :row-key="rowKey"
         table-layout="auto"
         :vertical-align="verticalAlign"
@@ -71,22 +75,6 @@
         :stripe="true"
         :loading="dataLoading"
       >
-        <template #moduleId="slotProps">
-          <t-tag theme="success" variant="light">{{
-            MODULE.find((item) => item.value == slotProps.row.moduleId)?.label
-          }}</t-tag>
-        </template>
-
-        <template #transmissionMode="slotProps">
-          <t-tag theme="primary" variant="light">
-            {{ TRANSMISSON_MODE.find((item) => item.value == slotProps.row.transmissionMode)?.label }}
-          </t-tag>
-          <a
-            class="t-button-link text-blue-800 ml-2"
-            @click="$router.push({ name: 'dataStandardApi', params: { id: slotProps.row.id } })"
-            >配置</a
-          >
-        </template>
         <template #op="slotProps">
           <div class="flex flex-wrap">
             <a class="t-button-link" @click="rehandleClickOp(slotProps)">管理</a>
@@ -105,49 +93,54 @@
         @current-change="onCurrentChange"
       />
 
-      <t-dialog v-model:visible="addVisible" :header="dialogTitle" width="600px" :footer="false">
+      <t-dialog v-model:visible="addVisible" :header="dialogTitle" width="600px" :footer="false" destroy-on-close>
         <t-form
           ref="addForm"
-          :data="addFormData"
-          :label-width="80"
+          :data="formData"
+          :label-width="120"
           colon
-          :rules="ADD_FROM_RULES"
+          :rules="API_DISPOSE_FORM_RULES"
           @submit="onConfirmAdd"
         >
-          <t-form-item label="标准名称" name="standardName">
-            <t-input
-              v-model="addFormData.standardName"
+          <t-form-item label="API名称" name="apiName">
+            <t-input v-model="formData.apiName" class="form-item-content" placeholder="请输入API名称" />
+          </t-form-item>
+          <t-form-item label="API地址" name="url">
+            <t-input v-model="formData.url" class="form-item-content" placeholder="请输入API地址" />
+          </t-form-item>
+          <t-form-item label="请求方式" name="method">
+            <t-select
+              v-model="formData.method"
+              style="display: inline-block"
               class="form-item-content"
-              type="search"
-              placeholder="请输入数据标准名称"
-              :style="{ minWidth: '134px' }"
+              :options="API_DISPOSE_METHOD"
+              placeholder="请选择请求方式"
+              @change="onMethodSelectChange"
             />
           </t-form-item>
-          <t-form-item label="标准详情" name="descripition">
+          <t-form-item label="请求内容类型" name="contentType">
+            <t-select
+              v-model="formData.contentType"
+              style="display: inline-block"
+              class="form-item-content"
+              :options="apiDisposeContentType"
+              placeholder="请选择请求内容类型"
+              multiple
+              :max="3"
+            />
+          </t-form-item>
+          <t-form-item label="响应内容配置" name="response">
+            <t-textarea v-model="formData.response" class="form-item-content" placeholder="请输入响应内容配置" />
+          </t-form-item>
+          <t-form-item label="映射" name="responseFieldMapping">
             <t-textarea
-              v-model="addFormData.descripition"
+              v-model="formData.responseFieldMapping"
               class="form-item-content"
-              placeholder="请输入标准详情"
-              :style="{ minWidth: '134px' }"
-            ></t-textarea>
-          </t-form-item>
-          <t-form-item label="功能模块" name="moduleId">
-            <t-select
-              v-model="addFormData.moduleId"
-              style="display: inline-block"
-              class="form-item-content"
-              :options="MODULE"
-              placeholder="请选择功能模块"
+              placeholder="请输入接口返回值字段与数据规范的映射"
             />
           </t-form-item>
-          <t-form-item label="传输模式" name="moduleId">
-            <t-select
-              v-model="addFormData.transmissionMode"
-              style="display: inline-block"
-              class="form-item-content"
-              :options="TRANSMISSON_MODE"
-              placeholder="请选择传输模式"
-            />
+          <t-form-item label="示例请求信息" name="sampleReqInfo">
+            <t-textarea v-model="formData.sampleReqInfo" class="form-item-content" placeholder="请输入示例请求信息" />
           </t-form-item>
           <t-form-item style="float: right">
             <t-button variant="outline" @click="addVisible = false">取消</t-button>
@@ -159,25 +152,45 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, computed, onMounted, watchEffect } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { Data, DialogPlugin, FormInstanceFunctions, MessagePlugin, SubmitContext } from 'tdesign-vue-next';
-import { useRouter } from 'vue-router';
-
-import { CONTRACT_TYPE_OPTIONS } from '@/constants';
-import { addDataStandard, delDataStandard, getDataStandardList, editDataStandard } from '@/api/dataStandard';
-import { dataStandardModel } from '@/api/model/dataStandardModel';
-import { ADD_FORM, ADD_FROM_RULES, TRANSMISSON_MODE, MODULE, COLUMNS } from './constants';
+import { useRoute, useRouter } from 'vue-router';
+import { addApiDispose, delApiDispose, getApiDisposeList, editApiDispose } from '@/api/apiDispose';
+import {
+  API_DISPOSE_FORM_RULES,
+  API_DISPOSE_FORM,
+  API_DISPOSE_COLUMNS,
+  API_DISPOSE_CONTENE_TYPE,
+  API_DISPOSE_METHOD,
+  API_DISPOSE_SEARCH_FORM,
+} from './constants';
+import { ApiDisposeModel } from '@/api/model/apiDisposeModel';
 
 const router = useRouter();
 
-const searchForm = {
-  standardName: '',
-  descripition: '',
-  moduleId: '',
-  transmissionMode: '',
+// 搜索
+const searchFormData = ref({ ...API_DISPOSE_SEARCH_FORM });
+const searchContentType = ref([]);
+const apiDisposeContentType = ref([...API_DISPOSE_CONTENE_TYPE]);
+
+// 新增编辑
+const addVisible = ref(false);
+const formData = ref<ApiDisposeModel>({ ...API_DISPOSE_FORM });
+const addForm = ref<FormInstanceFunctions>(null);
+
+const onMethodSelectChange = (e) => {
+  if (e === 'GET') {
+    apiDisposeContentType.value = [
+      { label: 'query', value: 'query' },
+      { label: 'path', value: 'path' },
+    ];
+    console.log('e', e);
+  } else {
+    apiDisposeContentType.value = [...API_DISPOSE_CONTENE_TYPE];
+  }
+  console.log('apiDisposeContentType', apiDisposeContentType.value);
 };
 
-const formData = ref({ ...searchForm });
 const rowKey = 'id';
 const verticalAlign = 'top' as const;
 const hover = true;
@@ -198,17 +211,22 @@ const onCurrentChange = (page: number) => {
   fetchData();
 };
 
-const data = ref([]);
+const route = useRoute();
+const { id } = route.params as { id: string };
 
+const data = ref([]);
 const dataLoading = ref(false);
 const fetchData = async () => {
   dataLoading.value = true;
   try {
     const { page, pageSize } = pagination.value;
-    const { list, total } = await getDataStandardList({
+    const search = { ...searchFormData.value };
+    search.contentType = searchContentType.value?.join(',');
+    const { list, total } = await getApiDisposeList({
       page,
       pageSize,
-      ...formData.value,
+      sharedDataStandardId: id || '',
+      ...search,
     });
     data.value = list;
     pagination.value = {
@@ -223,7 +241,7 @@ const fetchData = async () => {
 };
 
 const searchReset = () => {
-  formData.value = { ...searchForm };
+  searchFormData.value = { ...API_DISPOSE_SEARCH_FORM };
   fetchData();
 };
 
@@ -233,11 +251,11 @@ onMounted(() => {
 
 const handleClickDelete = async ({ row }) => {
   const dialog = DialogPlugin.confirm({
-    header: '确认删除当前所选标准？',
+    header: '确认删除当前所选API配置？',
     body: '删除后将无法恢复',
     onConfirm: async () => {
       try {
-        await delDataStandard(row.id);
+        await delApiDispose(row.id);
         MessagePlugin.success('删除成功');
         dialog.destroy();
         fetchData();
@@ -251,16 +269,18 @@ const handleClickDelete = async ({ row }) => {
 };
 
 const isEdit = computed(() => {
-  return !!addFormData.value.id;
+  return !!formData.value.id;
 });
 
 const dialogTitle = computed(() => {
-  return isEdit.value ? '编辑数据标准' : '新增数据标准';
+  return isEdit.value ? '编辑API配置' : '新增API配置';
 });
 
 const handleClickEdit = async ({ row }) => {
   addVisible.value = true;
-  addFormData.value = { ...row };
+  formData.value = { ...row };
+  formData.value.contentType = formData.value.contentType?.split(',');
+  onMethodSelectChange(formData.value.method);
 };
 
 const rehandleClickOp = ({ row }) => {
@@ -269,14 +289,13 @@ const rehandleClickOp = ({ row }) => {
   });
 };
 
-const addVisible = ref(false);
-const addFormData = ref<dataStandardModel>({ ...ADD_FORM });
-const addForm = ref<FormInstanceFunctions>(null);
-watchEffect(() => {
-  if (!addVisible.value) {
-    addFormData.value = { ...ADD_FORM };
+watch(addVisible, (newVal) => {
+  if (!newVal) {
+    formData.value = { ...API_DISPOSE_FORM };
     addForm.value?.clearValidate();
   }
+  searchFormData.value.contentType = '';
+  searchFormData.value.method = '';
 });
 
 const onConfirmAdd = async ({ firstError }: SubmitContext<Data>) => {
@@ -284,23 +303,25 @@ const onConfirmAdd = async ({ firstError }: SubmitContext<Data>) => {
     MessagePlugin.warning(firstError);
     return;
   }
+
+  formData.value.contentType = formData.value.contentType?.join(',');
   try {
     const params = {
-      ...addFormData.value,
+      ...formData.value,
+      sharedDataStandardId: id,
     };
     if (isEdit.value) {
       delete params.id;
-      await editDataStandard(addFormData.value.id, params);
+      await editApiDispose(formData.value.id, params);
       MessagePlugin.success('编辑成功');
     } else {
-      await addDataStandard(addFormData.value);
+      await addApiDispose(params);
       MessagePlugin.success('添加成功');
     }
     fetchData();
+    addVisible.value = false;
   } catch (error) {
     MessagePlugin.error('操作错误');
-  } finally {
-    addVisible.value = false;
   }
 };
 

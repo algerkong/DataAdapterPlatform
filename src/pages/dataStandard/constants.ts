@@ -110,7 +110,7 @@ export const ADD_FROM_RULES: Record<string, FormRule[]> = {
 
 export const TRANSMISSON_MODE = [
   {
-    label: 'api传输',
+    label: 'API传输',
     value: '0',
   },
   {

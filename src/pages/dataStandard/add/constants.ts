@@ -24,6 +24,11 @@ export const DATA_STRUCTURE_COLUMN: PrimaryTableCol<TableRowData>[] = [
     colKey: 'fieldType',
   },
   {
+    title: '字段默认值',
+    ellipsis: true,
+    colKey: 'fieldDefaultValue',
+  },
+  {
     title: '字段描述',
     ellipsis: true,
     colKey: 'fieldDescription',
@@ -32,11 +37,6 @@ export const DATA_STRUCTURE_COLUMN: PrimaryTableCol<TableRowData>[] = [
     title: '字段长度',
     ellipsis: true,
     colKey: 'fieldLength',
-  },
-  {
-    title: '字段默认值',
-    ellipsis: true,
-    colKey: 'fieldDefaultValue',
   },
   {
     title: '是否唯一',
@@ -77,6 +77,13 @@ export const ADD_DATA_STRUCTURE_FROM = {
   fieldDefaultValue: '',
   isUnique: 1,
   outOfUse: 1,
+};
+
+export const SEARCH_DATA_STRUCTURE_FROM = {
+  fieldName: '',
+  fieldType: '',
+  fieldDescription: null,
+  fieldDefaultValue: null,
 };
 
 export const ADD_DATA_STRUCTURE_RULES: Record<string, FormRule[]> = {

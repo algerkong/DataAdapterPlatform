@@ -3,16 +3,18 @@
     <t-breadcrumbItem v-for="item in crumbs" :key="item.to" :to="item.to">
       {{ item.title }}
     </t-breadcrumbItem>
+    <t-breadcrumbItem v-if="!route.meta?.notBack" @click="router.back()"> 返回 </t-breadcrumbItem>
   </t-breadcrumb>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
+
+const router = useRouter();
+const route = useRoute();
 
 const crumbs = computed(() => {
-  const route = useRoute();
-
   const pathArray = route.path.split('/');
   pathArray.shift();
 
