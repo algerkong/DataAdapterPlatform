@@ -120,6 +120,17 @@ const transform: AxiosTransform = {
         ? `${options.authenticationScheme} ${token}`
         : token;
     }
+    // 处理请求参数data 删除 createTime updateTime
+    if (config.method?.toUpperCase() === 'POST' || config.method?.toUpperCase() === 'PATCH') {
+      const data = config.data || {};
+      try {
+        delete data.createdTime;
+        delete data.updatedTime;
+      } catch (error) {
+        console.error(error);
+      }
+      config.data = data;
+    }
     return config;
   },
 
