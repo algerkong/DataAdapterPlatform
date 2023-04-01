@@ -126,6 +126,7 @@ const transform: AxiosTransform = {
       try {
         delete data.createdTime;
         delete data.updatedTime;
+        // data.updatedTime = new Date().getTime();
       } catch (error) {
         console.error(error);
       }

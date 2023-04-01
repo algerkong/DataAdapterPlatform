@@ -2,7 +2,7 @@
   <div :class="layoutCls">
     <t-head-menu :class="menuCls" :theme="theme" expand-type="popup" :value="active">
       <template #logo>
-        <span v-if="showLogo" class="header-logo-container" @click="handleNav('/dashboard/base')">
+        <span v-if="showLogo" class="header-logo-container" @click="handleNav('/system')">
           <logo-full class="t-logo" />
         </span>
         <div v-else class="header-operate-left">
@@ -22,7 +22,7 @@
 
           <!-- 全局通知 -->
           <!-- <notice /> -->
-          <t-dropdown :min-column-width="135" trigger="click">
+          <!-- <t-dropdown :min-column-width="135" trigger="click">
             <template #dropdown>
               <t-dropdown-menu>
                 <t-dropdown-item class="operations-dropdown-container-item" @click="handleNav('/user/index')">
@@ -40,7 +40,7 @@
               <div class="header-user-account">Tencent</div>
               <template #suffix><t-icon name="chevron-down" /></template>
             </t-button>
-          </t-dropdown>
+          </t-dropdown> -->
           <t-tooltip placement="bottom" content="主题模式">
             <div class="theme" @click="changeMode">
               <component :is="getModeIcon(mode)" />
@@ -59,7 +59,7 @@ import { useRouter } from 'vue-router';
 import { useSettingStore } from '@/store';
 import { getActive } from '@/router';
 import { prefix } from '@/config/global';
-import LogoFull from '@/assets/assets-logo-full.svg?component';
+import LogoFull from '@/assets/icon.svg?component';
 import type { MenuRoute } from '@/types/interface';
 import SettingDarkIcon from '@/assets/assets-setting-dark.svg';
 import SettingLightIcon from '@/assets/assets-setting-light.svg';
@@ -250,7 +250,7 @@ const handleLogout = () => {
 }
 
 .header-logo-container {
-  width: 184px;
+  width: 200px;
   height: 26px;
   display: flex;
   margin-left: 24px;

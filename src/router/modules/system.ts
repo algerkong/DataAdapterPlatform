@@ -47,6 +47,12 @@ export default [
         component: () => import('@/pages/dataStandard/apiDispose/index.vue'),
         meta: { title: '配置API' },
       },
+      {
+        path: 'apiConfig/:id',
+        name: 'dataStandardApiConfig',
+        component: () => import('@/pages/dataStandard/apiConfig/index.vue'),
+        meta: { title: 'API接口配置项' },
+      },
     ],
   },
 ];
