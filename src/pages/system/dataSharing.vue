@@ -56,8 +56,19 @@
           <t-input v-model="formData.taskName" placeholder="请输入数据共享名称"></t-input>
         </t-form-item>
 
-        <t-form-item label="数据规范" name="dataStandardId">
-          <t-select v-model="formData.dataStandardId" class="demo-select-base">
+        <t-form-item label="数据规范" name="moduleId">
+          <t-select
+            v-model="formData.moduleId"
+            class="demo-select-base"
+            placeholder="请先选择模块名称"
+            @change="selectModele"
+          >
+            <t-option value="0" label="模块1"></t-option>
+            <t-option value="1" label="模块2"></t-option>
+            <t-option value="2" label="模块3"></t-option>
+          </t-select>
+
+          <t-select v-model="formData.dataStandardId" class="demo-select-base" placeholder="对应选择模块下的数据规范">
             <t-option
               v-for="item in Dataspecification"
               :key="item.id"
@@ -72,12 +83,11 @@
         </t-form-item>
 
         <t-form-item label="推送方式" name="transmissionType">
-          <t-select v-model="formData.transmissionType" class="demo-select-base">
-            <t-option value="0" label="API推送">API推送</t-option>
-            <t-option value="1" label="DB推送">DB推送</t-option>
+          <t-select v-model="formData.transmissionType" class="demo-select-base" placeholder="请选择推送方式">
+            <t-option value="0" label="API推送"></t-option>
+            <t-option value="1" label="DB推送"></t-option>
           </t-select>
         </t-form-item>
-
         <t-form-item style="float: right">
           <t-button variant="outline" @click="visible = false">取消</t-button>
           <t-button theme="primary" type="submit">确定</t-button>
@@ -127,6 +137,7 @@ const FORMDATA_VALUE = {
   dataStandardId: '',
   taskFrequency: '',
   transmissionType: '',
+  moduleId: '',
 };
 const lists = reactive({
   data: [],
@@ -141,6 +152,7 @@ const pages = reactive({
 const rules: Record<string, FormRule[]> = {
   taskName: [{ required: true, message: '请输入数据共享名称', type: 'error', trigger: 'blur' }],
   taskFrequency: [{ required: true, message: '请输入执行任务毫秒', type: 'error', trigger: 'blur' }],
+  moduleId: [{ required: true, message: '请选择模块', type: 'error', trigger: 'blur' }],
   transmissionType: [{ required: true, message: '请选择推送方式', type: 'error', trigger: 'blur' }],
   dataStandardId: [
     // 注意：trigger: blur 仅在输入框或选择框失去焦点时触发，需要注意配合 trigger: change 使用
@@ -166,7 +178,13 @@ const columns: BaseTableColumns = [
     title: '任务执行频率(毫秒)',
     align: 'center',
   },
+  {
+    colKey: 'dataStandardId.standardName',
+    title: '数据标准',
+    align: 'center',
+  },
   { colKey: 'createdTime', title: '申请时间', align: 'center' },
+  { colKey: 'updatedTime', title: '修改时间', align: 'center' },
   { colKey: 'operates', title: '操作', align: 'center' },
 ];
 const getLists = async () => {
@@ -184,19 +202,9 @@ const clickReturn = () => {
   Router.push('/system');
 };
 
-const gainlists = () => {
-  getDataSpecification({
-    page: pages.current,
-    pageSize: 999,
-  }).then((res: any) => {
-    Dataspecification.value = res.list;
-  });
-};
-
 const addClickdatas = (value: any) => {
   status.value = value;
   visible.value = true;
-  gainlists();
 };
 const onSearch = async () => {
   dataLoading.value = true;
@@ -216,7 +224,18 @@ const refresh = () => {
 const editClickdatas = (value: any) => {
   status.value = value;
   visible.value = true;
-  gainlists();
+};
+const selectModele = async (value: any) => {
+  if (value) {
+    formData.value.dataStandardId = '';
+  }
+  await getDataSpecification({
+    page: pages.current,
+    pageSize: 999,
+    modeuleId: value,
+  }).then((res: any) => {
+    Dataspecification.value = res.list;
+  });
 };
 const deleteClick = () => {
   confirmVisible.value = true;
@@ -258,6 +277,7 @@ const onSubmit = async ({ validateResult, firstError }) => {
         dataStandardId: formData.value.dataStandardId,
         transmissionType: formData.value.transmissionType,
         taskFrequency: formData.value.taskFrequency,
+        moduleId: formData.value.moduleId,
       }).then((res) => {
         MessagePlugin.success(res.message);
         visible.value = false;
