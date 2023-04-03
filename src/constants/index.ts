@@ -23,9 +23,8 @@ export const CONTRACT_TYPES = {
 };
 
 export const CONTRACT_TYPE_OPTIONS = [
-  { value: CONTRACT_TYPES.MAIN, label: '主合同' },
-  { value: CONTRACT_TYPES.SUB, label: '子合同' },
-  { value: CONTRACT_TYPES.SUPPLEMENT, label: '补充合同' },
+  { value: 1, label: '成功' },
+  { value: 2, label: '失败' },
 ];
 
 // 合同收付类型枚举

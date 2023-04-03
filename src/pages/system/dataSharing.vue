@@ -68,7 +68,12 @@
             <t-option value="2" label="模块3"></t-option>
           </t-select>
 
-          <t-select v-model="formData.dataStandardId" class="demo-select-base" placeholder="对应选择模块下的数据规范">
+          <t-select
+            v-model="formData.dataStandardId"
+            class="demo-select-base"
+            placeholder="对应选择模块下的数据规范"
+            @change="selectLists"
+          >
             <t-option
               v-for="item in Dataspecification"
               :key="item.id"
@@ -232,7 +237,24 @@ const selectModele = async (value: any) => {
   await getDataSpecification({
     page: pages.current,
     pageSize: 999,
-    modeuleId: value,
+    moduleId: value,
+  }).then((res: any) => {
+    Dataspecification.value = res.list;
+  });
+};
+
+const selectLists = (e) => {
+  Dataspecification.value.forEach((element) => {
+    if (element.id === e) {
+      formData.value.moduleId = element.moduleId;
+    }
+  });
+};
+
+const dataSpecificationLists = () => {
+  getDataSpecification({
+    page: pages.current,
+    pageSize: 999,
   }).then((res: any) => {
     Dataspecification.value = res.list;
   });
@@ -304,6 +326,8 @@ watchEffect(() => {
   if (visible.value === false) {
     formData.value = { ...FORMDATA_VALUE };
     form.value?.clearValidate();
+  } else {
+    dataSpecificationLists();
   }
 });
 

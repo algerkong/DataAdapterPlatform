@@ -55,4 +55,19 @@ export default [
       },
     ],
   },
+  {
+    path: '/log',
+    name: 'log',
+    component: Layout,
+    redirect: '/log/index',
+    meta: { title: '日志管理', icon: 'layers', orderNo: 0 },
+    children: [
+      {
+        path: 'index',
+        name: 'logIndex',
+        component: () => import('@/pages/log/index.vue'),
+        meta: { title: '日志管理' },
+      },
+    ],
+  },
 ];
