@@ -133,6 +133,7 @@ const handleDeleteItem = (product) => {
 const onConfirmDelete = async () => {
   await delSystem(deleteSystem.value.id);
   MessagePlugin.success('删除成功');
+  confirmVisible.value = false;
   fetchData();
 };
 const onCancel = () => {
