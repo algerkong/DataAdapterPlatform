@@ -31,7 +31,7 @@
         <template #operates="{ row }">
           <t-popconfirm :content="row.isOnline ? '确认下线吗' : '确认上线吗'" @confirm="clickStatus(row)">
             <t-button theme="primary" variant="text">
-              {{ row.isOnline ? '上线' : '下线' }}
+              {{ row.isOnline ? '下线' : '上线' }}
             </t-button>
           </t-popconfirm>
           <t-button theme="primary" variant="text" @click="editClickdatas(false)">编辑</t-button>
