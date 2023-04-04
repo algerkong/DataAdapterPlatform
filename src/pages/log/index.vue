@@ -5,6 +5,16 @@
         <t-col :span="10">
           <t-row :gutter="[24, 24]">
             <t-col :span="3">
+              <t-form-item label="请求路径" name="moduleId">
+                <t-input
+                  v-model="formData.url"
+                  class="form-item-content"
+                  placeholder="请输入请求路径"
+                  :style="{ minWidth: '134px' }"
+                />
+              </t-form-item>
+            </t-col>
+            <t-col :span="3">
               <t-form-item label="请求方法" name="standardName">
                 <t-select
                   v-model="formData.handler"
@@ -21,16 +31,6 @@
                   v-model="formData.status"
                   class="form-item-content"
                   placeholder="请输入请求状态"
-                  :style="{ minWidth: '134px' }"
-                />
-              </t-form-item>
-            </t-col>
-            <t-col :span="3">
-              <t-form-item label="请求路径" name="moduleId">
-                <t-input
-                  v-model="formData.url"
-                  class="form-item-content"
-                  placeholder="请输入请求路径"
                   :style="{ minWidth: '134px' }"
                 />
               </t-form-item>
@@ -60,22 +60,21 @@
         :data="data"
         :columns="columns"
         :row-key="rowKey"
-        table-layout="auto"
         :vertical-align="verticalAlign"
         :hover="hover"
         :stripe="true"
         :loading="dataLoading"
       >
-        <template #op="{ row }">
-          <div class="flex flex-wrap">
-            <a class="t-button-link" @click="handlerDetail(row)">详情</a>
-          </div>
-        </template>
         <template #exception="{ row }">
           <div class="flex justify-center items-center">
             <t-tag :theme="row.exception === '' ? 'success' : 'danger'" variant="light">
               {{ row.exception === '' ? '正常' : '失败' }}
             </t-tag>
+          </div>
+        </template>
+        <template #op="{ row }">
+          <div class="flex justify-center items-center">
+            <a class="t-button-link" @click="handlerDetail(row)">详情</a>
           </div>
         </template>
       </t-table>
@@ -92,33 +91,33 @@
 
     <t-dialog v-model:visible="visible" header="详情日志" :confirm-btn="null" width="1000px" destroy-on-close top="80">
       <t-row class="form-scroll">
-        <t-col :span="6">
-          <span class="text-blue-800 font-bold">URL：</span>
+        <t-col class="col flex justify-start">
+          <div class="text-blue-800 font-bold">URL：</div>
           <span>{{ rowDetail.url }}</span>
         </t-col>
-        <t-col :span="6">
+        <t-col class="col flex">
           <span class="text-blue-800 font-bold">请求时间：</span>
           <span>{{ rowDetail.createdTime }}</span>
         </t-col>
-        <t-col :span="6" class="py-5">
+        <t-col class="col flex">
           <span class="text-blue-800 font-bold">message：</span>
           <span>{{ rowDetail.message }}</span>
         </t-col>
-        <t-col :span="6" class="py-5">
+        <t-col class="col flex">
           <span class="text-blue-800 font-bold">IP：</span>
           <span>{{ rowDetail.ip }}</span>
         </t-col>
-        <t-col class="py-5">
+        <!-- <t-col class="pt-5">
           <span class="text-blue-800 font-bold">params：</span>
           <json-viewer :value="JSON.parse(rowDetail.params)"></json-viewer>
-        </t-col>
-        <t-col>
+        </t-col> -->
+        <t-col class="col">
           <span class="text-blue-800 font-bold">body(请求参数)：</span>
-          <json-viewer :value="JSON.parse(rowDetail.result)"></json-viewer>
-        </t-col>
-        <t-col>
-          <span class="text-blue-800 font-bold">result(返回参数)：</span>
           <json-viewer :value="JSON.parse(rowDetail.body)"></json-viewer>
+        </t-col>
+        <t-col class="col">
+          <span class="text-blue-800 font-bold">result(返回参数)：</span>
+          <json-viewer :value="JSON.parse(rowDetail.result)"></json-viewer>
         </t-col>
       </t-row>
     </t-dialog>
@@ -154,6 +153,12 @@ const pagination = ref({
 
 const columns: BaseTableColumns = [
   {
+    colKey: 'url',
+    title: '请求路径',
+    width: '300px',
+    ellipsis: true,
+  },
+  {
     colKey: 'handler',
     title: '请求方法',
     // type-slot-name 会被用于自定义单元格的插槽名称
@@ -167,11 +172,6 @@ const columns: BaseTableColumns = [
     align: 'center',
   },
   {
-    colKey: 'url',
-    title: '请求路径',
-    align: 'center',
-  },
-  {
     colKey: 'status',
     title: '请求状态',
     align: 'center',
@@ -179,6 +179,7 @@ const columns: BaseTableColumns = [
   {
     colKey: 'message',
     title: '返回消息',
+    ellipsis: true,
     align: 'center',
   },
   {
@@ -282,6 +283,7 @@ onMounted(() => {
   max-height: 600px;
   overflow-y: scroll;
   overflow-x: hidden;
+  padding-right: 20px;
   &::-webkit-scrollbar {
     width: 8px;
     background: transparent;
@@ -295,4 +297,15 @@ onMounted(() => {
   }
 }
 
+:deep(.jv-code) {
+  padding: 20px 10px;
+  background-color: #f6f6f6;
+}
+
+.col {
+  background-color: #f6f6f6;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  padding: 10px 10px !important;
+}
 </style>
