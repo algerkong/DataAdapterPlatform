@@ -1,10 +1,10 @@
 <template>
   <div class="list-common-table">
-    <t-form ref="form" :data="searchFormData" :label-width="80" colon @reset="searchReset" @submit="fetchData">
+    <t-form ref="form" :data="searchFormData" :label-width="120" colon @reset="searchReset" @submit="fetchData">
       <t-row>
         <t-col :span="10">
-          <t-row :gutter="[24, 24]">
-            <t-col :span="3">
+          <t-row>
+            <t-col :span="3" :lg="3" :md="6" :xs="12">
               <t-form-item label="API名称" name="apiName">
                 <t-input
                   v-model="searchFormData.apiName"
@@ -15,7 +15,7 @@
                 />
               </t-form-item>
             </t-col>
-            <t-col :span="3">
+            <t-col :span="3" :lg="3" :md="6" :xs="12">
               <t-form-item label="API地址" name="url">
                 <t-input
                   v-model="searchFormData.url"
@@ -25,7 +25,7 @@
                 />
               </t-form-item>
             </t-col>
-            <t-col :span="3">
+            <t-col :span="3" :lg="3" :md="6" :xs="12">
               <t-form-item label="请求方式" name="method">
                 <t-select
                   v-model="searchFormData.method"
@@ -37,16 +37,15 @@
                 />
               </t-form-item>
             </t-col>
-            <t-col :span="3">
+            <t-col :span="3" :lg="3" :md="6" :xs="12">
               <t-form-item label="参数类型" name="contentType">
                 <t-select
-                  v-model="searchContentType"
+                  v-model="searchFormData.contentType"
                   style="display: inline-block"
                   class="form-item-content"
                   :options="apiDisposeContentType"
                   placeholder="请选择请求内容类型"
-                  multiple
-                  :max="3"
+                  @change="onContentTypeSelectChange"
                 />
               </t-form-item>
             </t-col>
@@ -93,44 +92,58 @@
         @current-change="onCurrentChange"
       />
 
-      <t-dialog v-model:visible="addVisible" :header="dialogTitle" width="600px" :footer="false" destroy-on-close>
+      <t-dialog v-model:visible="addVisible" :header="dialogTitle" width="1200px" :footer="false" destroy-on-close>
         <t-form
           ref="addForm"
           :data="formData"
           :label-width="120"
           colon
           :rules="API_DISPOSE_FORM_RULES"
+          class="form-scroll"
           @submit="onConfirmAdd"
         >
-          <t-form-item label="API名称" name="apiName">
-            <t-input v-model="formData.apiName" class="form-item-content" placeholder="请输入API名称" />
-          </t-form-item>
-          <t-form-item label="API地址" name="url">
-            <t-input v-model="formData.url" class="form-item-content" placeholder="请输入API地址" />
-          </t-form-item>
-          <t-form-item label="请求方式" name="method">
-            <t-select
-              v-model="formData.method"
-              style="display: inline-block"
-              class="form-item-content"
-              :options="API_DISPOSE_METHOD"
-              placeholder="请选择请求方式"
-              @change="onMethodSelectChange"
-            />
-          </t-form-item>
-          <t-form-item label="请求内容类型" name="contentType">
-            <t-select
-              v-model="formData.contentType"
-              style="display: inline-block"
-              class="form-item-content"
-              :options="apiDisposeContentType"
-              placeholder="请选择请求内容类型"
-              multiple
-              :max="3"
-            />
-          </t-form-item>
+          <t-row :gutter="[12, 12]" class="mb-6">
+            <t-col :span="6">
+              <t-form-item label="API名称" name="apiName">
+                <t-input v-model="formData.apiName" class="form-item-content" placeholder="请输入API名称" />
+              </t-form-item>
+            </t-col>
+            <t-col :span="6">
+              <t-form-item label="API地址" name="url">
+                <t-input v-model="formData.url" class="form-item-content" placeholder="请输入API地址" />
+              </t-form-item>
+            </t-col>
+          </t-row>
+          <t-row :gutter="[12, 12]" class="mb-6 font">
+            <t-col :span="6">
+              <t-form-item label="请求方式" name="method">
+                <t-select
+                  v-model="formData.method"
+                  style="display: inline-block"
+                  class="form-item-content"
+                  :options="API_DISPOSE_METHOD"
+                  placeholder="请选择请求方式"
+                  @change="onMethodSelectChange"
+                />
+              </t-form-item>
+            </t-col>
+            <t-col :span="6">
+              <t-form-item label="请求内容类型" name="contentType">
+                <t-select
+                  v-model="formData.contentType"
+                  style="display: inline-block"
+                  class="form-item-content"
+                  :options="apiDisposeContentType"
+                  placeholder="请选择请求内容类型"
+                  @change="onContentTypeSelectChange"
+                />
+              </t-form-item>
+            </t-col>
+          </t-row>
+
           <t-form-item label="响应内容配置" name="response">
-            <t-textarea v-model="formData.response" class="form-item-content" placeholder="请输入响应内容配置" />
+            <!-- <t-textarea v-model="formData.response" class="form-item-content" placeholder="请输入响应内容配置" /> -->
+            <t-tree :data="items" activable hover transition expand-all draggable />
           </t-form-item>
           <t-form-item label="映射" name="responseFieldMapping">
             <t-textarea
@@ -139,7 +152,7 @@
               placeholder="请输入接口返回值字段与数据规范的映射"
             />
           </t-form-item>
-          <t-form-item label="示例请求信息" name="sampleReqInfo">
+          <t-form-item label="示例请求信息" name="sampleReqInfo" class="over">
             <t-textarea v-model="formData.sampleReqInfo" class="form-item-content" placeholder="请输入示例请求信息" />
           </t-form-item>
           <t-form-item style="float: right">
@@ -170,25 +183,70 @@ const router = useRouter();
 
 // 搜索
 const searchFormData = ref({ ...API_DISPOSE_SEARCH_FORM });
-const searchContentType = ref([]);
 const apiDisposeContentType = ref([...API_DISPOSE_CONTENE_TYPE]);
 
 // 新增编辑
 const addVisible = ref(false);
 const formData = ref<ApiDisposeModel>({ ...API_DISPOSE_FORM });
 const addForm = ref<FormInstanceFunctions>(null);
+const items = [
+  {
+    value: '1',
+    label: '1',
+    children: [
+      {
+        value: '1.1',
+        label: '1.1',
+        children: [
+          {
+            value: '1.1.1',
+            label: '1.1.1',
+            children: [
+              {
+                value: '1.1.1.1',
+                label: '1.1.1.1',
+              },
+              {
+                value: '1.1.1.2',
+                label: '1.1.1.2',
+              },
+            ],
+          },
+          {
+            value: '1.1.2',
+            label: '1.1.2',
+            children: [
+              {
+                value: '1.1.2.1',
+                label: '1.1.2.1',
+              },
+              {
+                value: '1.1.2.2',
+                label: '1.1.2.2',
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+];
 
 const onMethodSelectChange = (e) => {
   if (e === 'GET') {
-    apiDisposeContentType.value = [
-      { label: 'query', value: 'query' },
-      { label: 'path', value: 'path' },
-    ];
-    console.log('e', e);
+    apiDisposeContentType.value = [{ label: 'query', value: 'query' }];
+    formData.value.contentType = 'query';
+    searchFormData.value.contentType = 'query';
   } else {
     apiDisposeContentType.value = [...API_DISPOSE_CONTENE_TYPE];
   }
-  console.log('apiDisposeContentType', apiDisposeContentType.value);
+};
+
+const onContentTypeSelectChange = (e) => {
+  if (e === 'query') {
+    formData.value.method = 'GET';
+    searchFormData.value.method = 'GET';
+  }
 };
 
 const rowKey = 'id';
@@ -221,7 +279,6 @@ const fetchData = async () => {
   try {
     const { page, pageSize } = pagination.value;
     const search = { ...searchFormData.value };
-    search.contentType = searchContentType.value?.join(',');
     const { list, total } = await getApiDisposeList({
       page,
       pageSize,
@@ -279,7 +336,6 @@ const dialogTitle = computed(() => {
 const handleClickEdit = async ({ row }) => {
   addVisible.value = true;
   formData.value = { ...row };
-  formData.value.contentType = formData.value.contentType?.split(',');
   onMethodSelectChange(formData.value.method);
 };
 
@@ -303,8 +359,6 @@ const onConfirmAdd = async ({ firstError }: SubmitContext<Data>) => {
     MessagePlugin.warning(firstError);
     return;
   }
-
-  formData.value.contentType = formData.value.contentType?.join(',');
   try {
     const params = {
       ...formData.value,
@@ -364,6 +418,23 @@ const toAdd = () => {
     display: flex;
     align-items: center;
     margin-left: var(--td-comp-margin-s);
+  }
+}
+
+.form-scroll {
+  overflow-y: scroll;
+  overflow-x: hidden;
+  max-height: 600px;
+  &::-webkit-scrollbar {
+    width: 8px;
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 6px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+    background-color: var(--td-scrollbar-color);
   }
 }
 </style>

@@ -480,7 +480,6 @@ const validateForm = async () => {
 };
 
 const handleClickAdd = async () => {
-  console.log('formData', formRefList.value);
   if (!(await validateForm())) {
     return;
   }

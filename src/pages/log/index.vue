@@ -230,8 +230,6 @@ const searchReset = () => {
 };
 
 const handlerDetail = (row) => {
-  console.log(row);
-
   visible.value = true;
   rowDetail.value = row;
 };

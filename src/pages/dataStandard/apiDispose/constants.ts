@@ -58,7 +58,6 @@ export const API_DISPOSE_CONTENE_TYPE = [
   { label: 'json', value: 'json' },
   { label: 'form-data', value: 'form-data' },
   { label: 'query', value: 'query' },
-  { label: 'path', value: 'path' },
   { label: 'x-www-form-urlencoded', value: 'x-www-form-urlencoded' },
   { label: 'raw', value: 'raw' },
   { label: 'binary', value: 'binary' },

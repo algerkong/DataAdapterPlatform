@@ -25,7 +25,7 @@ export const addApiDispose = (data: ApiDisposeModel) => {
 };
 
 export const editApiDispose = (id: string, data: ApiDisposeModel) => {
-  return request.put<ApiDisposeModel>({
+  return request.patch<ApiDisposeModel>({
     url: `${Api}/${id}`,
     data,
   });
