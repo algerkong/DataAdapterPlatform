@@ -141,9 +141,8 @@
             </t-col>
           </t-row>
 
-          <t-form-item label="响应内容配置" name="response">
-            <!-- <t-textarea v-model="formData.response" class="form-item-content" placeholder="请输入响应内容配置" /> -->
-            <t-tree :data="items" activable hover transition expand-all draggable />
+          <t-form-item label="响应内容配置">
+            <tree-table ref="treeTable" />
           </t-form-item>
           <t-form-item label="映射" name="responseFieldMapping">
             <t-textarea
@@ -178,8 +177,10 @@ import {
   API_DISPOSE_SEARCH_FORM,
 } from './constants';
 import { ApiDisposeModel } from '@/api/model/apiDisposeModel';
+import TreeTable from './treeTable.vue';
 
 const router = useRouter();
+const treeTable = ref(null);
 
 // 搜索
 const searchFormData = ref({ ...API_DISPOSE_SEARCH_FORM });
@@ -189,48 +190,6 @@ const apiDisposeContentType = ref([...API_DISPOSE_CONTENE_TYPE]);
 const addVisible = ref(false);
 const formData = ref<ApiDisposeModel>({ ...API_DISPOSE_FORM });
 const addForm = ref<FormInstanceFunctions>(null);
-const items = [
-  {
-    value: '1',
-    label: '1',
-    children: [
-      {
-        value: '1.1',
-        label: '1.1',
-        children: [
-          {
-            value: '1.1.1',
-            label: '1.1.1',
-            children: [
-              {
-                value: '1.1.1.1',
-                label: '1.1.1.1',
-              },
-              {
-                value: '1.1.1.2',
-                label: '1.1.1.2',
-              },
-            ],
-          },
-          {
-            value: '1.1.2',
-            label: '1.1.2',
-            children: [
-              {
-                value: '1.1.2.1',
-                label: '1.1.2.1',
-              },
-              {
-                value: '1.1.2.2',
-                label: '1.1.2.2',
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  },
-];
 
 const onMethodSelectChange = (e) => {
   if (e === 'GET') {
@@ -355,6 +314,8 @@ watch(addVisible, (newVal) => {
 });
 
 const onConfirmAdd = async ({ firstError }: SubmitContext<Data>) => {
+  console.log(JSON.parse(JSON.stringify(treeTable.value.tableData.tableData))[0]);
+
   if (firstError) {
     MessagePlugin.warning(firstError);
     return;
