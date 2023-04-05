@@ -91,32 +91,32 @@
 
     <t-dialog v-model:visible="visible" header="详情日志" :confirm-btn="null" width="1000px" destroy-on-close top="80">
       <t-row class="form-scroll">
-        <t-col class="col flex justify-start">
-          <div class="text-blue-800 font-bold">URL：</div>
-          <span>{{ rowDetail.url }}</span>
+        <t-col class="col flex">
+          <div class="label">URL：</div>
+          <div>{{ rowDetail.url }}</div>
         </t-col>
         <t-col class="col flex">
-          <span class="text-blue-800 font-bold">请求时间：</span>
-          <span>{{ rowDetail.createdTime }}</span>
+          <div class="label">请求时间：</div>
+          <div>{{ rowDetail.createdTime }}</div>
         </t-col>
         <t-col class="col flex">
-          <span class="text-blue-800 font-bold">message：</span>
-          <span>{{ rowDetail.message }}</span>
+          <div class="label">message：</div>
+          <div>{{ rowDetail.message }}</div>
         </t-col>
         <t-col class="col flex">
-          <span class="text-blue-800 font-bold">IP：</span>
-          <span>{{ rowDetail.ip }}</span>
+          <div class="label">IP：</div>
+          <div>{{ rowDetail.ip }}</div>
         </t-col>
         <!-- <t-col class="pt-5">
-          <span class="text-blue-800 font-bold">params：</span>
+          <div class="label">params：</div>
           <json-viewer :value="JSON.parse(rowDetail.params)"></json-viewer>
         </t-col> -->
         <t-col class="col">
-          <span class="text-blue-800 font-bold">body(请求参数)：</span>
+          <div class="label">body(请求参数)：</div>
           <json-viewer :value="JSON.parse(rowDetail.body)"></json-viewer>
         </t-col>
         <t-col class="col">
-          <span class="text-blue-800 font-bold">result(返回参数)：</span>
+          <div class="label">result(返回参数)：</div>
           <json-viewer :value="JSON.parse(rowDetail.result)"></json-viewer>
         </t-col>
       </t-row>
@@ -205,6 +205,7 @@ const data = ref([]);
 
 const dataLoading = ref(false);
 const fetchData = async () => {
+  dataLoading.value = true;
   try {
     const { page, pageSize } = pagination.value;
     const { list, total } = await getLogLists({
@@ -305,5 +306,12 @@ onMounted(() => {
   border-radius: 6px;
   margin-bottom: 20px;
   padding: 10px 10px !important;
+}
+
+.label {
+  @apply text-blue-800 font-bold;
+  & + div {
+    max-width: 750px;
+  }
 }
 </style>
