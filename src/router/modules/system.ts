@@ -70,4 +70,19 @@ export default [
       },
     ],
   },
+  {
+    path: '/dataSource',
+    name: 'dataSource',
+    component: Layout,
+    redirect: '/dataSource/index',
+    meta: { title: '数据源管理', icon: 'layers', orderNo: 0 },
+    children: [
+      {
+        path: 'index',
+        name: 'dataSourceIndex',
+        component: () => import('@/pages/dataSource/index.vue'),
+        meta: { title: '数据源管理' },
+      },
+    ],
+  },
 ];
