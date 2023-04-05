@@ -1,21 +1,67 @@
 <template>
   <t-card :bordered="false" hover-shadow>
-    <div style="display: flex; justify-content: space-between">
-      <div>
-        <t-button @click="clickReturn">返回系统列表</t-button>
-        <t-button @click="addClickdatas(true)">新增数据共享</t-button>
-      </div>
+    <div>
+      <t-form ref="form" :data="formlist" :label-width="80" colon @reset="searchReset" @submit="fetchData">
+        <t-row>
+          <t-col :span="10">
+            <t-row :gutter="[24, 24]">
+              <t-col :span="3">
+                <t-form-item label="任务名称" name="taskName">
+                  <t-input
+                    v-model="formlist.taskName"
+                    class="form-item-content"
+                    type="search"
+                    placeholder="请输入任务名称"
+                    :style="{ minWidth: '134px' }"
+                  />
+                </t-form-item>
+              </t-col>
+              <t-col :span="3">
+                <t-form-item label="执行频率" name="descripition">
+                  <t-input
+                    v-model="formlist.taskFrequency"
+                    class="form-item-content"
+                    placeholder="请输入任务执行频率(毫秒)"
+                    :style="{ minWidth: '134px' }"
+                  />
+                </t-form-item>
+              </t-col>
+              <t-col :span="3">
+                <t-form-item label="数据标准" name="standardName">
+                  <t-input
+                    v-model="formlist.standardName"
+                    class="form-item-content"
+                    placeholder="请输入数据标准"
+                    :style="{ minWidth: '134px' }"
+                  />
+                </t-form-item>
+              </t-col>
+              <t-col :span="3">
+                <t-form-item label="传输模式" name="status">
+                  <t-select
+                    v-model="formlist.status"
+                    style="display: inline-block"
+                    class="form-item-content"
+                    :options="TRANSMISSON_MODE"
+                    placeholder="请选择传输模式"
+                  />
+                </t-form-item>
+              </t-col>
+            </t-row>
+          </t-col>
 
-      <div style="width: 360px" class="flex">
-        <t-input v-model="searchValue" placeholder="请输入任务名称(Enter 确认搜索)" @enter="onSearch">
-          <template #suffix-icon>
-            <search-icon v-if="searchValue === ''" size="var(--td-comp-size-xxxs)" />
-          </template>
-        </t-input>
-        <t-button theme="primary" class="ml-2" @click="refresh">
-          <template #icon><refresh-icon size="26px" /></template>
-          重置
-        </t-button>
+          <t-col :span="2" class="operation-container">
+            <t-button theme="primary" type="submit" :style="{ marginLeft: 'var(--td-comp-margin-s)' }"> 查询 </t-button>
+            <t-button type="reset" variant="base" theme="default"> 重置 </t-button>
+          </t-col>
+        </t-row>
+      </t-form>
+    </div>
+
+    <div style="margin-top: 30px">
+      <div>
+        <!-- <t-button @click="clickReturn">返回系统列表</t-button> -->
+        <t-button @click="addClickdatas(true)">新增数据共享</t-button>
       </div>
     </div>
 
@@ -112,9 +158,9 @@
 
 <script setup lang="ts">
 import { ref, reactive, toRefs, watchEffect } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { SearchIcon, RefreshIcon } from 'tdesign-icons-vue-next';
+import { useRoute } from 'vue-router';
 import { BaseTableColumns, FormRule, MessagePlugin } from 'tdesign-vue-next';
+import { TRANSMISSON_MODE } from '../dataStandard/constants';
 import {
   getDataSharingList,
   getDataSpecification,
@@ -126,7 +172,6 @@ import {
 } from '@/api/dataSharing';
 
 const Route = useRoute();
-const Router = useRouter();
 const form = ref(null);
 const total = ref(0);
 const id = ref(Route.params.id);
@@ -135,7 +180,6 @@ const visible = ref(false);
 const confirmVisible = ref(false);
 const status = ref(null);
 const Dataspecification = ref([]);
-const searchValue = ref('');
 const dataLoading = ref(true);
 const FORMDATA_VALUE = {
   taskName: '',
@@ -149,7 +193,15 @@ const lists = reactive({
   formData: { ...FORMDATA_VALUE },
 });
 const { data, formData } = toRefs(lists);
-// const formData = ref({ ...FORMDATA_VALUE });
+
+const searchForm = {
+  taskName: '',
+  taskFrequency: '',
+  standardName: '',
+  status: '',
+};
+
+const formlist = ref({ ...searchForm });
 const pages = reactive({
   current: 1,
   pageSize: 10,
@@ -203,27 +255,30 @@ const getLists = async () => {
     dataLoading.value = false;
   });
 };
-const clickReturn = () => {
-  Router.push('/system');
-};
+// const clickReturn = () => {
+//   Router.push('/system');
+// };
 
 const addClickdatas = (value: any) => {
   status.value = value;
   visible.value = true;
 };
-const onSearch = async () => {
+const fetchData = async () => {
   dataLoading.value = true;
   await getDataSharingList({
     page: pages.current,
     pageSize: pages.pageSize,
-    taskName: searchValue.value,
+    taskName: formlist.value.taskName,
+    taskFrequency: formlist.value.taskFrequency,
+    standardName: formlist.value.standardName,
+    isOnline: formlist.value.status,
   }).then((res) => {
     data.value = res.list;
     dataLoading.value = false;
   });
 };
-const refresh = () => {
-  searchValue.value = '';
+const searchReset = () => {
+  formlist.value = { ...searchForm };
   getLists();
 };
 const editClickdatas = (value: any) => {
@@ -244,6 +299,8 @@ const selectModele = async (value: any) => {
 };
 
 const selectLists = (e) => {
+  console.log('编辑', 1111);
+
   Dataspecification.value.forEach((element) => {
     if (element.id === e) {
       formData.value.moduleId = element.moduleId;
@@ -287,7 +344,13 @@ const clickStatus = async (value) => {
   getLists();
 };
 const rowclick = (value: any) => {
-  formData.value = { ...value.row };
+  if (!status.value) {
+    formData.value = { ...value.row };
+    formData.value.dataStandardId = value.row.dataStandardId.standardName;
+    formData.value.moduleId = value.row.dataStandardId.moduleId;
+
+    // formData.value.moduleId = value.row.dataSharedTaskId.moduleId;
+  }
   dataSharedTaskId.value = value.row.id;
 };
 const onSubmit = async ({ validateResult, firstError }) => {
