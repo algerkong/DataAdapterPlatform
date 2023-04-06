@@ -36,6 +36,7 @@ export const API_DISPOSE_FORM: ApiDisposeModel = {
   responseFieldMapping: '',
   sampleReqInfo: '',
   sharedDataStandardId: '',
+  dataSourceId: '',
 };
 
 export const API_DISPOSE_SEARCH_FORM: ApiDisposeModel = {
@@ -52,6 +53,7 @@ export const API_DISPOSE_FORM_RULES: Record<string, FormRule[]> = {
   response: [{ required: true, message: '请输入响应内容配置' }],
   responseFieldMapping: [{ required: true, message: '请输入接口返回值字段与数据规范的映射' }],
   sampleReqInfo: [{ required: true, message: '请输入示例请求信息' }],
+  dataSourceId: [{ required: true, message: '请选择数据源' }],
 };
 
 export const API_DISPOSE_CONTENE_TYPE = [

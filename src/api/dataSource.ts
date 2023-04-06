@@ -4,10 +4,10 @@ import { request } from '@/utils/request';
 
 const Api = '/data_source';
 
-export const getDataSourceList = (params: RequestListParams) => {
+export const getDataSourceList = (params?: RequestListParams) => {
   return request.get<BaseListModel<DataSourceModel>>({
     url: Api,
-    params,
+    params: params || {},
   });
 };
 

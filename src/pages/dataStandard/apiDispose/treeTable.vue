@@ -8,21 +8,31 @@
       :column-config="{ resizable: true }"
       :print-config="{}"
       :export-config="{}"
-      :loading="demo1.loading"
-      :tree-config="demo1.treeConfig"
+      :loading="treeData.loading"
+      :tree-config="treeData.treeConfig"
       :edit-config="{ trigger: 'click', mode: 'row', showStatus: true }"
-      :data="demo1.tableData"
+      :data="treeData.tableData"
       height="200px"
     >
       <vxe-column tree-node width="60px"></vxe-column>
-      <vxe-column field="name" title="字段名" :edit-render="{}" width="150px">
+      <vxe-column field="fieldName" title="字段名" :edit-render="{}" width="150px">
         <template #edit="{ row }">
-          <vxe-input v-model="row.name" type="text" placeholder="请输入字段名" :disabled="row.id === 10000"></vxe-input>
+          <vxe-input
+            v-model="row.fieldName"
+            type="text"
+            placeholder="请输入字段名"
+            :disabled="row.id === 10000"
+          ></vxe-input>
         </template>
       </vxe-column>
-      <vxe-column field="size" title="默认值" :edit-render="{}" width="150px">
+      <vxe-column field="defaultValue" title="默认值" :edit-render="{}" width="150px">
         <template #edit="{ row }">
-          <vxe-input v-model="row.size" type="text" placeholder="请输入默认值" :disabled="row.id === 10000"></vxe-input>
+          <vxe-input
+            v-model="row.defaultValue"
+            type="text"
+            placeholder="请输入默认值"
+            :disabled="row.id === 10000"
+          ></vxe-input>
         </template>
       </vxe-column>
       <vxe-column field="type" title="类型" :edit-render="{}" width="150px">
@@ -36,9 +46,9 @@
           </vxe-select>
         </template>
       </vxe-column>
-      <vxe-column field="date" title="说明" :edit-render="{}" width="150px">
+      <vxe-column field="explain" title="说明" :edit-render="{}" width="150px">
         <template #edit="{ row }">
-          <vxe-textarea v-model="row.date" :disabled="row.id === 10000" placeholder="请输入说明"></vxe-textarea>
+          <vxe-textarea v-model="row.explain" :disabled="row.id === 10000" placeholder="请输入说明"></vxe-textarea>
         </template>
       </vxe-column>
       <vxe-column title="操作" width="300px">
@@ -58,12 +68,22 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, nextTick } from 'vue';
+import { ref, nextTick, defineProps, onMounted } from 'vue';
 import { VxeTableInstance, VxeToolbarInstance } from 'vxe-table';
 
-const demo1 = reactive({
+const treeData = ref({
   loading: false,
-  tableData: [] as any[],
+  tableData: [
+    {
+      id: 10000,
+      parentId: null,
+      fieldName: '根节点',
+      type: 'Object',
+      defaultValue: 'mock',
+      explain: '说明',
+      children: [],
+    },
+  ] as any[],
   treeConfig: {
     transform: true,
     rowField: 'id',
@@ -74,29 +94,71 @@ const demo1 = reactive({
 const xTable = ref<VxeTableInstance>();
 const xToolbar = ref<VxeToolbarInstance>();
 
-const findList = () => {
-  demo1.loading = true;
-  return new Promise((resolve) => {
+const props = defineProps({
+  value: {
+    type: Object,
+  },
+});
+
+// watch(
+//   () => props.value,
+//   (newProps) => {
+//     console.log(newProps);
+//   },
+//   { deep: true },
+// );
+onMounted(() => {
+  if (props.value !== null) {
     setTimeout(() => {
-      demo1.tableData = [{ id: 10000, parentId: null, name: '根节点', type: 'Object', size: 'mock', date: '说明' }];
-      demo1.loading = false;
-      resolve(null);
-    }, 300);
-  });
+      props.value.forEach((element) => {
+        insertRow(element, false, 10000);
+      });
+    }, 200);
+  }
+});
+
+const findList = () => {
+  treeData.value.loading = true;
+  // setTimeout(() => {
+  //   treeData.value.tableData = [
+  //     {
+  //       id: 10000,
+  //       parentId: null,
+  //       fieldName: '根节点',
+  //       type: 'Object',
+  //       defaultValue: 'mock',
+  //       explain: '说明',
+  //       children: props.value,
+  //     },
+  //   ];
+  //   console.log('11111', treeData.value.tableData);
+  //   console.log('props', props.value);
+  // }, 200);
+
+  treeData.value.loading = false;
 };
 
-const insertRow = async (currRow: any, locat: string) => {
+const insertRow = async (currRow: any, locat: string, id) => {
   const $table = xTable.value;
   // 如果 null 则插入到目标节点顶部
   // 如果 -1 则插入到目标节点底部
   // 如果 row 则有插入到效的目标节点该行的位置// 插入子节点
   if (locat === 'top') {
     const record = {
-      name: '',
+      fieldName: '',
       id: Date.now(),
       parentId: currRow.id,
-      type: '', // 需要指定父节点，自动插入该节点中
-      date: '',
+      type: '',
+      defaultValue: '',
+      explain: '',
+    };
+    const { row: newRow } = await $table.insert(record);
+    await $table.setTreeExpand(currRow, true); // 将父节点展开
+    await $table.setEditRow(newRow); // 插入子节点
+  } else if (id) {
+    const record = {
+      parentId: id,
+      ...currRow,
     };
     const { row: newRow } = await $table.insert(record);
     await $table.setTreeExpand(currRow, true); // 将父节点展开
@@ -121,7 +183,7 @@ nextTick(() => {
 });
 
 defineExpose({
-  tableData: demo1,
+  tableData: treeData,
 });
 </script>
 

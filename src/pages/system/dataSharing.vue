@@ -270,7 +270,7 @@ const fetchData = async () => {
     pageSize: pages.pageSize,
     taskName: formlist.value.taskName,
     taskFrequency: formlist.value.taskFrequency,
-    standardName: formlist.value.standardName,
+    standardName: formlist.value.standardName, 
     isOnline: formlist.value.status,
   }).then((res) => {
     data.value = res.list;

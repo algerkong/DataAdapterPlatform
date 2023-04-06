@@ -9,4 +9,5 @@ export interface ApiDisposeModel {
   sampleReqInfo?: string; // 示例请求信息
   sharedDataStandardId?: string; // 数据标准ID
   apiConfigItems?: any[]; // 配置项
+  dataSourceId?: string; // 数据源id
 }

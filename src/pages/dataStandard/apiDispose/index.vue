@@ -140,9 +140,21 @@
               </t-form-item>
             </t-col>
           </t-row>
+          <t-col :span="6" class="mb-6 font">
+            <t-form-item label="数据源" name="dataSourceId">
+              <t-select
+                v-model="formData.dataSourceId"
+                style="display: inline-block"
+                class="form-item-content"
+                :options="seleteDataSource"
+                placeholder="请选择数据源"
+                @change="onContentTypeSelectChange"
+              />
+            </t-form-item>
+          </t-col>
 
           <t-form-item label="响应内容配置">
-            <tree-table ref="treeTable" />
+            <tree-table ref="treeTableRef" :value="treeTableDate" />
           </t-form-item>
           <t-form-item label="映射" name="responseFieldMapping">
             <t-textarea
@@ -164,10 +176,11 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, watch, reactive } from 'vue';
 import { Data, DialogPlugin, FormInstanceFunctions, MessagePlugin, SubmitContext } from 'tdesign-vue-next';
 import { useRoute, useRouter } from 'vue-router';
 import { addApiDispose, delApiDispose, getApiDisposeList, editApiDispose } from '@/api/apiDispose';
+import { getDataSourceList } from '@/api/dataSource';
 import {
   API_DISPOSE_FORM_RULES,
   API_DISPOSE_FORM,
@@ -180,7 +193,10 @@ import { ApiDisposeModel } from '@/api/model/apiDisposeModel';
 import TreeTable from './treeTable.vue';
 
 const router = useRouter();
-const treeTable = ref(null);
+const treeTableRef = ref(null);
+const treeTableDate = ref(null);
+
+const seleteDataSource = ref([]);
 
 // 搜索
 const searchFormData = ref({ ...API_DISPOSE_SEARCH_FORM });
@@ -261,8 +277,12 @@ const searchReset = () => {
   fetchData();
 };
 
-onMounted(() => {
-  fetchData();
+onMounted(async () => {
+  await fetchData();
+  const { list: dataSourceList } = await getDataSourceList();
+  seleteDataSource.value = dataSourceList.map((item) => {
+    return { label: item.name, value: item.id };
+  });
 });
 
 const handleClickDelete = async ({ row }) => {
@@ -294,6 +314,7 @@ const dialogTitle = computed(() => {
 
 const handleClickEdit = async ({ row }) => {
   addVisible.value = true;
+  treeTableDate.value = JSON.parse(row.response);
   formData.value = { ...row };
   onMethodSelectChange(formData.value.method);
 };
@@ -314,7 +335,7 @@ watch(addVisible, (newVal) => {
 });
 
 const onConfirmAdd = async ({ firstError }: SubmitContext<Data>) => {
-  console.log(JSON.parse(JSON.stringify(treeTable.value.tableData.tableData))[0]);
+  const tableDate = JSON.stringify(treeTableRef.value.tableData.tableData[0].children);
 
   if (firstError) {
     MessagePlugin.warning(firstError);
@@ -324,6 +345,7 @@ const onConfirmAdd = async ({ firstError }: SubmitContext<Data>) => {
     const params = {
       ...formData.value,
       sharedDataStandardId: id,
+      response: tableDate,
     };
     if (isEdit.value) {
       delete params.id;
