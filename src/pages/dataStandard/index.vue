@@ -89,7 +89,7 @@
         </template>
         <template #op="slotProps">
           <div class="flex flex-wrap">
-            <a class="t-button-link" @click="rehandleClickOp(slotProps)">管理</a>
+            <a class="t-button-link" @click="rehandleClickOp(slotProps)">数据结构</a>
             <a class="t-button-link" @click="handleClickEdit(slotProps)">修改</a>
             <a class="t-button-link" @click="handleClickDelete(slotProps)">删除</a>
           </div>

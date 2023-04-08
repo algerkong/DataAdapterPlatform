@@ -73,3 +73,19 @@ export const API_DISPOSE_METHOD = [
   { label: 'DELETE', value: 'DELETE' },
   { label: 'PATCH', value: 'PATCH' },
 ];
+
+export interface RESPONSE_FIELD_MAPPING_TYPE {
+  fieldName: string;
+  fieldMapping: string;
+  isUnique: 0 | 1;
+}
+export const RESPONSE_FIELD_MAPPING: RESPONSE_FIELD_MAPPING_TYPE = {
+  isUnique: 0,
+  fieldName: '',
+  fieldMapping: '',
+};
+
+export const RESPONSE_FIELD_MAPPING_RULES: Record<string, FormRule[]> = {
+  fieldName: [{ required: true, message: '请选择字段名称' }],
+  fieldMapping: [{ required: true, message: '请输入字段映射' }],
+};

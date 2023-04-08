@@ -4,10 +4,10 @@ import { request } from '@/utils/request';
 
 const Api = '/data_structure';
 
-export const getDataStructureList = (params: RequestListParams) => {
+export const getDataStructureList = (params?: RequestListParams) => {
   return request.get<BaseListModel<dataStructureModel>>({
     url: Api,
-    params,
+    params: params || {},
   });
 };
 

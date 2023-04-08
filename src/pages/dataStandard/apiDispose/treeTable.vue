@@ -1,43 +1,49 @@
 <template>
-  <div>
+  <div class="w-full">
     <vxe-table
       ref="xTable"
       show-overflow
       keep-source
-      :row-config="{ keyField: 'id' }"
+      border="full"
+      round
+      :row-config="{ keyField: 'id', isHover: true }"
       :column-config="{ resizable: true }"
-      :print-config="{}"
-      :export-config="{}"
       :loading="treeData.loading"
       :tree-config="treeData.treeConfig"
-      :edit-config="{ trigger: 'click', mode: 'row', showStatus: true }"
+      :edit-config="{ trigger: 'click', mode: 'row', showIcon: false }"
+      :edit-rules="validRules"
       :data="treeData.tableData"
-      height="200px"
     >
-      <vxe-column tree-node width="60px"></vxe-column>
-      <vxe-column field="fieldName" title="字段名" :edit-render="{}" width="150px">
+      <vxe-column tree-node field="fieldName" title="字段名" :edit-render="{}" min-width="200">
         <template #edit="{ row }">
           <vxe-input
             v-model="row.fieldName"
             type="text"
             placeholder="请输入字段名"
-            :disabled="row.id === 10000"
+            :disabled="!isDisabled(row)"
           ></vxe-input>
         </template>
       </vxe-column>
-      <vxe-column field="defaultValue" title="默认值" :edit-render="{}" width="150px">
+      <vxe-column field="defaultValue" title="默认值" :edit-render="{}">
         <template #edit="{ row }">
           <vxe-input
             v-model="row.defaultValue"
             type="text"
             placeholder="请输入默认值"
-            :disabled="row.id === 10000"
+            :disabled="!isDisabled(row)"
           ></vxe-input>
         </template>
       </vxe-column>
-      <vxe-column field="type" title="类型" :edit-render="{}" width="150px">
+      <vxe-column field="type" title="类型" :edit-render="{}">
         <template #edit="{ row }">
-          <vxe-select v-model="row.type" :disabled="row.id === 10000" clearable placeholder="请选择类型">
+          <vxe-select
+            v-model="row.type"
+            :disabled="!isDisabled(row)"
+            clearable
+            transfer
+            placeholder="请选择类型"
+            @change="(e) => changeSelect(e, row)"
+          >
             <vxe-option value="string" label="string"></vxe-option>
             <vxe-option value="boolean" label="boolean"></vxe-option>
             <vxe-option value="array" label="array"></vxe-option>
@@ -46,12 +52,12 @@
           </vxe-select>
         </template>
       </vxe-column>
-      <vxe-column field="explain" title="说明" :edit-render="{}" width="150px">
+      <vxe-column field="explain" title="说明" :edit-render="{}">
         <template #edit="{ row }">
-          <vxe-textarea v-model="row.explain" :disabled="row.id === 10000" placeholder="请输入说明"></vxe-textarea>
+          <vxe-input v-model="row.explain" :disabled="!isDisabled(row)" placeholder="请输入说明"></vxe-input>
         </template>
       </vxe-column>
-      <vxe-column title="操作" width="300px">
+      <vxe-column title="操作" width="150px">
         <template #default="{ row }">
           <vxe-button
             v-if="row.type === 'object' || row.id === 10000"
@@ -68,8 +74,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, nextTick, defineProps, onMounted } from 'vue';
+import { ref, nextTick, defineProps, onMounted, computed, watch } from 'vue';
 import { VxeTableInstance, VxeToolbarInstance } from 'vxe-table';
+import { MessagePlugin } from 'tdesign-vue-next';
 
 const treeData = ref({
   loading: false,
@@ -78,8 +85,8 @@ const treeData = ref({
       id: 10000,
       parentId: null,
       fieldName: '根节点',
-      type: 'Object',
-      defaultValue: 'mock',
+      type: 'object',
+      defaultValue: '',
       explain: '说明',
       children: [],
     },
@@ -90,6 +97,15 @@ const treeData = ref({
     parentField: 'parentId',
   },
 });
+// 深层监听treeData.value.tableData对象 可以监听到新增的数据 如push splice等
+const emits = defineEmits(['changeTable']);
+watch(
+  treeData,
+  (newValue) => {
+    emits('changeTable', newValue.tableData[0].children);
+  },
+  { deep: true },
+);
 
 const xTable = ref<VxeTableInstance>();
 const xToolbar = ref<VxeToolbarInstance>();
@@ -111,7 +127,7 @@ onMounted(() => {
   if (props.value !== null) {
     setTimeout(() => {
       props.value.forEach((element) => {
-        insertRow(element, false, 10000);
+        insertRow(element, 'false', 10000);
       });
     }, 200);
   }
@@ -138,31 +154,90 @@ const findList = () => {
   treeData.value.loading = false;
 };
 
-const insertRow = async (currRow: any, locat: string, id) => {
+const changeSelect = async (e, row) => {
+  const $table = xTable.value;
+  console.log(e.value, row);
+  if (e.value === 'array') {
+    const data = {
+      fieldName: 'items[]',
+      id: Date.now(),
+      parentId: row.id,
+      type: 'object',
+      defaultValue: '',
+      explain: '数组项',
+    };
+    row.children = [];
+    const { row: newRow } = await $table.insert(data);
+    await $table.setTreeExpand(row, true); // 将父节点展开
+    await $table.setEditRow(newRow); // 插入子节点
+  } else if (e.value === 'object') {
+    row.children = [];
+    await insertRow(row, 'top');
+  }
+};
+
+// 传参根据id'判断是否可以编辑
+const isDisabled = computed(() => {
+  return (row) => {
+    if (row.id === 10000) {
+      return false;
+    }
+    try {
+      const data = findNode(row.parentId, treeData.value.tableData);
+      if (data.children[0].fieldName === 'items[]') {
+        return false;
+      }
+    } catch (e) {
+      return true;
+    }
+    return true;
+  };
+});
+
+// 根据ID查询节点
+const findNode = (id, data) => {
+  let result = null;
+  for (let i = 0; i < data.length; i++) {
+    if (data[i].id === id) {
+      result = data[i];
+      break;
+    } else if (data[i].children && data[i].children.length > 0) {
+      result = findNode(id, data[i].children);
+      if (result) {
+        break;
+      }
+    }
+  }
+  return result;
+};
+
+const insertRow = async (currRow: any, locate: string, id?) => {
   const $table = xTable.value;
   // 如果 null 则插入到目标节点顶部
   // 如果 -1 则插入到目标节点底部
   // 如果 row 则有插入到效的目标节点该行的位置// 插入子节点
-  if (locat === 'top') {
-    const record = {
+  let record = {};
+  if (locate === 'top') {
+    record = {
       fieldName: '',
       id: Date.now(),
       parentId: currRow.id,
-      type: '',
+      type: 'string',
       defaultValue: '',
       explain: '',
     };
-    const { row: newRow } = await $table.insert(record);
-    await $table.setTreeExpand(currRow, true); // 将父节点展开
-    await $table.setEditRow(newRow); // 插入子节点
   } else if (id) {
-    const record = {
+    record = {
       parentId: id,
       ...currRow,
     };
-    const { row: newRow } = await $table.insert(record);
+  }
+  try {
+    const { row: newRow } = await $table.insertAt(record, locate === 'top' ? -1 : 1);
     await $table.setTreeExpand(currRow, true); // 将父节点展开
     await $table.setEditRow(newRow); // 插入子节点
+  } catch (e) {
+    console.error(e);
   }
 };
 
@@ -174,6 +249,30 @@ const removeRow = async (row: any) => {
   await $table.remove(row);
 };
 
+const validRules = ref({
+  fieldName: [{ required: true, message: '字段名必须填写' }],
+  type: [{ required: true, message: '字段类型必须选择' }],
+});
+
+const fullValidEvent = async () => {
+  const $table = xTable.value;
+  const errMap = await $table.fullValidate();
+  if (errMap) {
+    const msgList: string[] = [];
+    Object.values(errMap).forEach((errList: any) => {
+      errList.forEach((params: any) => {
+        const { column, rules } = params;
+        rules.forEach((rule: any) => {
+          msgList.push(`"${column.title}"校验错误：${rule.message}`);
+        });
+      });
+    });
+
+    msgList.forEach((msg) => {
+      MessagePlugin.warning(msg);
+    });
+  }
+};
 nextTick(() => {
   // 将表格和工具栏进行关联
   const $table = xTable.value;
@@ -183,14 +282,15 @@ nextTick(() => {
 });
 
 defineExpose({
-  tableData: treeData,
+  fullValidEvent,
 });
 </script>
 
 <style lang="less" scoped>
+//.vxe-select--panel {
+
+//}
 .vxe-select--panel {
-  position: fixed !important;
-  min-width: 10% !important;
-  left: auto !important;
+  z-index: 999999999 !important;
 }
 </style>

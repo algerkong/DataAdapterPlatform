@@ -225,17 +225,15 @@
                   size="large"
                 />
               </t-form-item>
-              <t-form-item style="width: 40px">
-                <t-tooltip content="删除数据结构">
-                  <t-button shape="circle" theme="danger" @click="handleClickDeleteAdd(index)">
-                    <template #icon> <close-icon /></template>
+              <t-form-item style="width: 80px">
+                <t-tooltip v-if="addList.length - 1 === index || index === 0" content="添加数据结构">
+                  <t-button variant="dashed" shape="square" @click="handleClickAdd">
+                    <t-icon name="add" />
                   </t-button>
                 </t-tooltip>
-              </t-form-item>
-              <t-form-item v-if="addList.length - 1 === index" style="width: 40px">
-                <t-tooltip content="添加数据结构">
-                  <t-button shape="circle" theme="primary" @click="handleClickAdd()">
-                    <template #icon> <add-icon /></template>
+                <t-tooltip content="删除数据结构">
+                  <t-button variant="dashed" shape="square" @click="handleClickDeleteAdd(index)">
+                    <t-icon name="remove" />
                   </t-button>
                 </t-tooltip>
               </t-form-item>
@@ -330,7 +328,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { AddIcon, CloseIcon } from 'tdesign-icons-vue-next';
 import { FormInstanceFunctions, MessagePlugin, PageInfo, PaginationProps } from 'tdesign-vue-next';
 
 import { getDataStandard } from '@/api/dataStandard';
