@@ -62,44 +62,46 @@
       />
 
       <t-dialog v-model:visible="addVisible" :header="dialogTitle" :width="600" :footer="false" destroy-on-close>
-        <t-form
-          ref="addForm"
-          :data="formData"
-          :label-width="120"
-          colon
-          :rules="DATA_SOURCE_FORM_RULES"
-          @submit="onConfirmAdd"
-        >
-          <t-form-item label="数据源名称" name="name">
-            <t-input v-model="formData.name" placeholder="请输入数据源名称" />
-          </t-form-item>
-          <t-form-item label="数据库名称" name="database">
-            <t-input v-model="formData.database" placeholder="请输入数据库名称" />
-          </t-form-item>
-          <t-form-item label="数据源表名" name="table">
-            <t-input v-model="formData.table" placeholder="请输入数据源表名" />
-          </t-form-item>
+        <t-loading size="large" :loading="createDataLoading" show-overlay text="测试连接中......">
+          <t-form
+            ref="addForm"
+            :data="formData"
+            :label-width="120"
+            colon
+            :rules="DATA_SOURCE_FORM_RULES"
+            @submit="onConfirmAdd"
+          >
+            <t-form-item label="数据源名称" name="name">
+              <t-input v-model="formData.name" placeholder="请输入数据源名称" />
+            </t-form-item>
+            <t-form-item label="数据库名称" name="database">
+              <t-input v-model="formData.database" placeholder="请输入数据库名称" />
+            </t-form-item>
+            <t-form-item label="数据源表名" name="table">
+              <t-input v-model="formData.table" placeholder="请输入数据源表名" />
+            </t-form-item>
 
-          <t-form-item label="数据源地址" name="url">
-            <t-input v-model="formData.url" placeholder="请输入数据源地址" />
-          </t-form-item>
+            <t-form-item label="数据源地址" name="url">
+              <t-input v-model="formData.url" placeholder="请输入数据源地址" />
+            </t-form-item>
 
-          <t-form-item label="数据源端口" name="port">
-            <t-input v-model="formData.port" placeholder="请输入数据源端口" />
-          </t-form-item>
+            <t-form-item label="数据源端口" name="port">
+              <t-input v-model="formData.port" placeholder="请输入数据源端口" />
+            </t-form-item>
 
-          <t-form-item label="数据源密码" name="password">
-            <t-input v-model="formData.password" placeholder="请输入数据源密码" />
-          </t-form-item>
+            <t-form-item label="数据源密码" name="password">
+              <t-input v-model="formData.password" placeholder="请输入数据源密码" />
+            </t-form-item>
 
-          <t-form-item label="数据源用户名" name="username">
-            <t-input v-model="formData.username" placeholder="请输入数据源用户名" />
-          </t-form-item>
-          <t-form-item style="float: right">
-            <t-button variant="outline" @click="addVisible = false">取消</t-button>
-            <t-button theme="primary" type="submit">确定</t-button>
-          </t-form-item>
-        </t-form>
+            <t-form-item label="数据源用户名" name="username">
+              <t-input v-model="formData.username" placeholder="请输入数据源用户名" />
+            </t-form-item>
+            <t-form-item style="float: right">
+              <t-button variant="outline" @click="addVisible = false">取消</t-button>
+              <t-button theme="primary" type="submit">确定</t-button>
+            </t-form-item>
+          </t-form>
+        </t-loading>
       </t-dialog>
     </div>
   </div>
@@ -123,6 +125,7 @@ const addForm = ref<FormInstanceFunctions>(null);
 const rowKey = 'id';
 const verticalAlign = 'top' as const;
 const hover = true;
+const createDataLoading = ref(false);
 
 const pagination = ref({
   page: 1,
@@ -213,12 +216,11 @@ watch(addVisible, (newVal) => {
 });
 
 const onConfirmAdd = async ({ firstError }: SubmitContext<Data>) => {
-  console.log('isEdit.value', isEdit.value);
-  console.log('formData.value', formData.value);
   if (firstError) {
     MessagePlugin.warning(firstError);
     return;
   }
+  createDataLoading.value = true;
   try {
     const params = {
       ...formData.value,
@@ -236,6 +238,7 @@ const onConfirmAdd = async ({ firstError }: SubmitContext<Data>) => {
   } catch (error) {
     MessagePlugin.error('操作错误');
   }
+  createDataLoading.value = false;
 };
 
 const toAdd = () => {
