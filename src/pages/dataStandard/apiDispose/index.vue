@@ -92,14 +92,7 @@
         @current-change="onCurrentChange"
       />
 
-      <t-dialog
-        v-model:visible="addVisible"
-        :header="dialogTitle"
-        width="1200px"
-        top="50px"
-        :footer="false"
-        destroy-on-close
-      >
+      <t-dialog v-model:visible="addVisible" :header="dialogTitle" width="1200px" top="50px" destroy-on-close>
         <t-form
           ref="addForm"
           :data="formData"
@@ -107,7 +100,6 @@
           colon
           :rules="API_DISPOSE_FORM_RULES"
           class="form-scroll relative"
-          @submit="onConfirmAdd"
         >
           <t-row :gutter="[12, 12]" class="mb-6">
             <t-col :span="6">
@@ -226,13 +218,18 @@
             </div>
           </t-form-item>
           <t-form-item label="示例请求信息" name="sampleReqInfo" class="over">
-            <t-textarea v-model="formData.sampleReqInfo" class="form-item-content" placeholder="请输入示例请求信息" />
-          </t-form-item>
-          <t-form-item class="sticky bottom-0 float-right w-full bg-white flex justify-end pr-10">
-            <t-button variant="outline" @click="addVisible = false">取消</t-button>
-            <t-button theme="primary" type="submit">确定</t-button>
+            <t-textarea
+              v-model="formData.sampleReqInfo"
+              class="form-item-content"
+              :autosize="{ minRows: 10 }"
+              placeholder="请输入示例请求信息"
+            />
           </t-form-item>
         </t-form>
+        <template #footer>
+          <t-button variant="outline" @click="addVisible = false">取消</t-button>
+          <t-button theme="primary" type="submit" @click="onConfirmAdd">确定</t-button>
+        </template>
       </t-dialog>
     </div>
   </div>
@@ -422,6 +419,10 @@ watch(addVisible, (newVal) => {
   if (!newVal) {
     formData.value = { ...API_DISPOSE_FORM };
     addForm.value?.clearValidate();
+  } else if (!isEdit.value) {
+    treeData.value = null;
+    treeTableData.value = null;
+    responseFieldMappingList.value = [{ ...RESPONSE_FIELD_MAPPING }];
   }
   searchFormData.value.contentType = '';
   searchFormData.value.method = '';
@@ -505,9 +506,14 @@ const getTreePath = (id, parent) => {
 // 添加和编辑
 const onConfirmAdd = async ({ firstError }: SubmitContext<Data>) => {
   const tableDate = JSON.stringify(treeData.value);
-  await treeTableRef.value.fullValidEvent();
   if (firstError) {
     MessagePlugin.warning(firstError);
+    return;
+  }
+  const valid = await treeTableRef.value.fullValidEvent();
+  console.log(valid, 'valid');
+  if (valid?.fieldName.length > 0) {
+    MessagePlugin.warning('请检查表单是否填写正确');
     return;
   }
   try {

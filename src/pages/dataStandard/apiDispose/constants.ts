@@ -69,9 +69,6 @@ export const API_DISPOSE_CONTENE_TYPE = [
 export const API_DISPOSE_METHOD = [
   { label: 'GET', value: 'GET' },
   { label: 'POST', value: 'POST' },
-  { label: 'PUT', value: 'PUT' },
-  { label: 'DELETE', value: 'DELETE' },
-  { label: 'PATCH', value: 'PATCH' },
 ];
 
 export interface RESPONSE_FIELD_MAPPING_TYPE {

@@ -272,6 +272,7 @@ const fullValidEvent = async () => {
       MessagePlugin.warning(msg);
     });
   }
+  return errMap;
 };
 nextTick(() => {
   // 将表格和工具栏进行关联
