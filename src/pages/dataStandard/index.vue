@@ -81,15 +81,10 @@
           <t-tag theme="primary" variant="light">
             {{ TRANSMISSON_MODE.find((item) => item.value == slotProps.row.transmissionMode)?.label }}
           </t-tag>
-          <a
-            class="t-button-link text-blue-800 ml-2"
-            @click="$router.push({ name: 'dataStandardApi', params: { id: slotProps.row.id } })"
-            >配置</a
-          >
         </template>
         <template #op="slotProps">
           <div class="flex flex-wrap">
-            <a class="t-button-link" @click="rehandleClickOp(slotProps)">数据结构</a>
+            <a class="t-button-link" @click="handleClickOp(slotProps)">数据结构</a>
             <a class="t-button-link" @click="handleClickEdit(slotProps)">修改</a>
             <a class="t-button-link" @click="handleClickDelete(slotProps)">删除</a>
           </div>
@@ -165,7 +160,7 @@ import { useRouter } from 'vue-router';
 
 import { CONTRACT_TYPE_OPTIONS } from '@/constants';
 import { addDataStandard, delDataStandard, getDataStandardList, editDataStandard } from '@/api/dataStandard';
-import { dataStandardModel } from '@/api/model/dataStandardModel';
+import { DataStandardModel } from '@/api/model/dataStandardModel';
 import { ADD_FORM, ADD_FROM_RULES, TRANSMISSON_MODE, MODULE, COLUMNS } from './constants';
 
 const router = useRouter();
@@ -263,14 +258,14 @@ const handleClickEdit = async ({ row }) => {
   addFormData.value = { ...row };
 };
 
-const rehandleClickOp = ({ row }) => {
+const handleClickOp = ({ row }) => {
   router.push({
     path: `/dataStandard/add/${row.id}`,
   });
 };
 
 const addVisible = ref(false);
-const addFormData = ref<dataStandardModel>({ ...ADD_FORM });
+const addFormData = ref<DataStandardModel>({ ...ADD_FORM });
 const addForm = ref<FormInstanceFunctions>(null);
 watchEffect(() => {
   if (!addVisible.value) {

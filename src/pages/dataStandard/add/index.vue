@@ -332,7 +332,7 @@ import { FormInstanceFunctions, MessagePlugin, PageInfo, PaginationProps } from 
 
 import { getDataStandard } from '@/api/dataStandard';
 import { addDataStructure, deleteDataStructure, getDataStructureList, editDataStructure } from '@/api/dataStructure';
-import { dataStandardModel } from '@/api/model/dataStandardModel';
+import { DataStandardModel } from '@/api/model/dataStandardModel';
 import {
   DATA_STRUCTURE_COLUMN,
   ADD_DATA_STRUCTURE_RULES,
@@ -367,7 +367,7 @@ const handlePageChange = (pageInfo: PageInfo) => {
   getData();
 };
 
-const dataStandard = ref<dataStandardModel>();
+const dataStandard = ref<DataStandardModel>();
 const data = ref<Array<dataStructureModel>>([]);
 const getData = async () => {
   dataLoading.value = true;

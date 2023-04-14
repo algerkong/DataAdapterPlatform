@@ -1,4 +1,4 @@
-export interface dataStandardModel {
+export interface DataStandardModel {
   id?: string;
   standardName: string;
   descripition: string;

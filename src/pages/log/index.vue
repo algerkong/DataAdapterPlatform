@@ -1,13 +1,13 @@
 <template>
   <div class="list-common-table">
-    <t-form ref="form" :data="formData" :label-width="80" colon @reset="searchReset" @submit="fetchData">
+    <t-form ref="form" :data="searchForm" :label-width="80" colon @reset="searchReset" @submit="fetchData">
       <t-row>
         <t-col :span="10">
           <t-row :gutter="[24, 24]">
             <t-col :span="3">
               <t-form-item label="请求路径" name="moduleId">
                 <t-input
-                  v-model="formData.url"
+                  v-model="searchForm.url"
                   class="form-item-content"
                   placeholder="请输入请求路径"
                   :style="{ minWidth: '134px' }"
@@ -17,7 +17,7 @@
             <t-col :span="3">
               <t-form-item label="请求方法" name="standardName">
                 <t-select
-                  v-model="formData.handler"
+                  v-model="searchForm.handler"
                   style="display: inline-block"
                   class="form-item-content"
                   :options="API_DISPOSE_METHOD"
@@ -28,7 +28,7 @@
             <t-col :span="3">
               <t-form-item label="请求状态" name="descripition">
                 <t-input
-                  v-model="formData.status"
+                  v-model="searchForm.status"
                   class="form-item-content"
                   placeholder="请输入请求状态"
                   :style="{ minWidth: '134px' }"
@@ -38,7 +38,7 @@
             <t-col :span="3">
               <t-form-item label="返回信息" name="moduleId">
                 <t-input
-                  v-model="formData.message"
+                  v-model="searchForm.message"
                   class="form-item-content"
                   placeholder="请输入返回信息"
                   :style="{ minWidth: '134px' }"
@@ -58,7 +58,7 @@
     <div class="table-container">
       <t-table
         :data="data"
-        :columns="columns"
+        :columns="LOG_COLUMNS"
         :row-key="rowKey"
         :vertical-align="verticalAlign"
         :hover="hover"
@@ -83,7 +83,7 @@
         v-model="pagination.page"
         v-model:page-size="pagination.pageSize"
         :total="pagination.total"
-        :page-size-options="[10, 20, 30, 40, 50]"
+        :page-size-options="[12, 20, 30, 40, 50]"
         @page-size-change="onPageSizeChange"
         @current-change="onCurrentChange"
       />
@@ -125,71 +125,34 @@
 </template>
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { BaseTableColumns } from 'tdesign-vue-next';
 import JsonViewer from 'vue-json-viewer';
+import { useRoute } from 'vue-router';
 import { getLogLists } from '@/api/log';
-import { API_DISPOSE_METHOD } from '../dataStandard/apiDispose/constants';
-
-const searchForm = {
-  handler: '',
-  status: '',
-  url: '',
-  message: '',
-};
+import { API_DISPOSE_METHOD } from '@/pages/system/apiDispose/constants';
+import { LOG_COLUMNS, LOG_SEARCH_FORM } from '@/pages/log/constants';
 
 const rowDetail = ref({ body: '{}', result: '{}', params: '{}', createdTime: '{}', message: '', url: '{}', ip: '' });
 
 const visible = ref(false);
-const formData = ref({ ...searchForm });
+const searchForm = ref({ ...LOG_SEARCH_FORM });
 const rowKey = 'id';
 const verticalAlign = 'top' as const;
 const hover = true;
 
+const route = useRoute();
+if (route.query?.id) {
+  searchForm.value = {
+    ...searchForm.value,
+    taskId: route.query?.id as string,
+  };
+  document.title = (route.query?.name as string) || '日志';
+}
+
 const pagination = ref({
   page: 1,
-  pageSize: 10,
+  pageSize: 12,
   total: 0,
 });
-
-const columns: BaseTableColumns = [
-  {
-    colKey: 'url',
-    title: '请求路径',
-    width: '300px',
-    ellipsis: true,
-  },
-  {
-    colKey: 'handler',
-    title: '请求方法',
-    // type-slot-name 会被用于自定义单元格的插槽名称
-    cell: 'type-slot-name',
-    align: 'center',
-  },
-  {
-    title: 'IP',
-    // 没有 cell 的情况下， platform 会被用作自定义单元格的插槽名称
-    colKey: 'ip',
-    align: 'center',
-  },
-  {
-    colKey: 'status',
-    title: '请求状态',
-    align: 'center',
-  },
-  {
-    colKey: 'message',
-    title: '返回消息',
-    ellipsis: true,
-    align: 'center',
-  },
-  {
-    colKey: 'exception',
-    title: '异常信息',
-    align: 'center',
-  },
-  { colKey: 'createdTime', title: '请求时间', align: 'center' },
-  { colKey: 'op', title: '操作', align: 'center' },
-];
 
 const onPageSizeChange = (size: number) => {
   pagination.value.pageSize = size;
@@ -211,7 +174,7 @@ const fetchData = async () => {
     const { list, total } = await getLogLists({
       page,
       pageSize,
-      ...formData.value,
+      ...searchForm.value,
     });
     data.value = list;
     pagination.value = {
@@ -226,7 +189,7 @@ const fetchData = async () => {
 };
 
 const searchReset = () => {
-  formData.value = { ...searchForm };
+  searchForm.value = { ...LOG_SEARCH_FORM };
   fetchData();
 };
 
@@ -241,77 +204,5 @@ onMounted(() => {
 </script>
 
 <style lang="less" scoped>
-.list-common-table {
-  background-color: var(--td-bg-color-container);
-  padding: var(--td-comp-paddingTB-xxl) var(--td-comp-paddingLR-xxl);
-  border-radius: var(--td-radius-medium);
-
-  .table-container {
-    margin-top: var(--td-comp-margin-xxl);
-  }
-}
-
-.form-item-content {
-  width: 100%;
-}
-
-.operation-container {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  .expand {
-    .t-button__text {
-      display: flex;
-      align-items: center;
-    }
-  }
-}
-
-.payment-col {
-  display: flex;
-
-  .trend-container {
-    display: flex;
-    align-items: center;
-    margin-left: var(--td-comp-margin-s);
-  }
-}
-
-.form-scroll {
-  font-size: 16px;
-  max-height: 600px;
-  overflow-y: scroll;
-  overflow-x: hidden;
-  padding-right: 20px;
-  &::-webkit-scrollbar {
-    width: 8px;
-    background: transparent;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    border-radius: 6px;
-    border: 2px solid transparent;
-    background-clip: content-box;
-    background-color: var(--td-scrollbar-color);
-  }
-}
-
-:deep(.jv-code) {
-  padding: 20px 10px;
-  background-color: #f6f6f6;
-}
-
-.col {
-  background-color: #f6f6f6;
-  border-radius: 6px;
-  margin-bottom: 20px;
-  padding: 10px 10px !important;
-}
-
-.label {
-  @apply text-blue-800 font-bold;
-  & + div {
-    max-width: 750px;
-  }
-}
+@import url('./index.less');
 </style>

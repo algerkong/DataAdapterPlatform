@@ -139,18 +139,32 @@
               </t-form-item>
             </t-col>
           </t-row>
-          <t-col :span="6" class="mb-6 font">
-            <t-form-item label="数据源" name="dataSourceId">
-              <t-select
-                v-model="formData.dataSourceId"
-                style="display: inline-block"
-                class="form-item-content"
-                :options="selectDataSource"
-                placeholder="请选择数据源"
-                @change="onContentTypeSelectChange"
-              />
-            </t-form-item>
-          </t-col>
+          <t-row :gutter="[12, 12]" class="mb-6 font">
+            <t-col :span="6">
+              <t-form-item label="数据源" name="dataSourceId">
+                <t-select
+                  v-model="formData.dataSourceId"
+                  style="display: inline-block"
+                  class="form-item-content"
+                  :options="selectDataSource"
+                  placeholder="请选择数据源"
+                  @change="onContentTypeSelectChange"
+                />
+              </t-form-item>
+            </t-col>
+            <t-col :span="6">
+              <t-form-item label="数据结构" name="sharedDataStandardId">
+                <t-select
+                  v-model="formData.sharedDataStandardId"
+                  style="display: inline-block"
+                  class="form-item-content"
+                  :options="selectDataStandard"
+                  placeholder="请选择数据结构"
+                  @change="onDataStandardSelectChange"
+                />
+              </t-form-item>
+            </t-col>
+          </t-row>
 
           <t-form-item label="响应内容配置">
             <tree-table ref="treeTableRef" :value="treeTableData" @change-table="onTreeTableChange" />
@@ -254,6 +268,7 @@ import {
 import { ApiDisposeModel } from '@/api/model/apiDisposeModel';
 import TreeTable from './treeTable.vue';
 import { getDataStructureList } from '@/api/dataStructure';
+import { getDataStandardList } from '@/api/dataStandard';
 
 const router = useRouter();
 const treeTableRef = ref(null);
@@ -264,6 +279,8 @@ const treeData = ref(null);
 const selectDataSource = ref([]);
 // 数据规范选项
 const selectDataStructure = ref([]);
+// 数据结构选项
+const selectDataStandard = ref([]);
 
 // 搜索
 const searchFormData = ref({ ...API_DISPOSE_SEARCH_FORM });
@@ -273,23 +290,6 @@ const apiDisposeContentType = ref([...API_DISPOSE_CONTENE_TYPE]);
 const addVisible = ref(false);
 const formData = ref<ApiDisposeModel>({ ...API_DISPOSE_FORM });
 const addForm = ref<FormInstanceFunctions>(null);
-
-const onMethodSelectChange = (e) => {
-  if (e === 'GET') {
-    apiDisposeContentType.value = [{ label: 'query', value: 'query' }];
-    formData.value.contentType = 'query';
-    searchFormData.value.contentType = 'query';
-  } else {
-    apiDisposeContentType.value = [...API_DISPOSE_CONTENE_TYPE];
-  }
-};
-
-const onContentTypeSelectChange = (e) => {
-  if (e === 'query') {
-    formData.value.method = 'GET';
-    searchFormData.value.method = 'GET';
-  }
-};
 
 const rowKey = 'id';
 const verticalAlign = 'top' as const;
@@ -301,6 +301,12 @@ const pagination = ref({
   total: 0,
 });
 
+const route = useRoute();
+const { id } = route.params as { id: string };
+
+const data = ref([]);
+const dataLoading = ref(false);
+
 const onPageSizeChange = (size: number) => {
   pagination.value.pageSize = size;
   pagination.value.page = 1;
@@ -311,12 +317,6 @@ const onCurrentChange = (page: number) => {
   fetchData();
 };
 
-const route = useRoute();
-const { id } = route.params as { id: string };
-
-const data = ref([]);
-const dataLoading = ref(false);
-
 // 基础数据
 const fetchData = async () => {
   dataLoading.value = true;
@@ -326,7 +326,7 @@ const fetchData = async () => {
     const { list, total } = await getApiDisposeList({
       page,
       pageSize,
-      sharedDataStandardId: id || '',
+      shareDataId: id || '',
       ...search,
     });
     data.value = list;
@@ -354,14 +354,10 @@ onMounted(async () => {
     return { label: item.name, value: item.id };
   });
 
-  // 获取所有id下的数据结构
-  const { list: dataStructureList } = await getDataStructureList({ sharedDataStandardId: id || '' });
-  selectDataStructure.value = dataStructureList.map((item) => {
-    let label = `${item.fieldName}(${item.fieldDescription})`;
-    if (item?.isUnique) {
-      label = `${item.fieldName}(${item.fieldDescription}) [唯一]`;
-    }
-    return { label, value: item.fieldName, ...item };
+  // 获取所有数据结构
+  const { list } = await getDataStandardList();
+  selectDataStandard.value = list.map((item) => {
+    return { label: item.standardName, value: item.id };
   });
 });
 
@@ -387,7 +383,10 @@ const handleClickDelete = async ({ row }) => {
 
 const handleClickOp = ({ row }) => {
   router.push({
-    path: `/dataStandard/apiConfig/${row.id}`,
+    name: 'dataShareApiConfig',
+    params: {
+      id: row.id,
+    },
   });
 };
 
@@ -405,14 +404,44 @@ const onTreeTableChange = (data) => {
   treeData.value = data;
 };
 
+const onMethodSelectChange = (e) => {
+  if (e === 'GET') {
+    apiDisposeContentType.value = [{ label: 'query', value: 'query' }];
+    formData.value.contentType = 'query';
+    searchFormData.value.contentType = 'query';
+  } else {
+    apiDisposeContentType.value = [...API_DISPOSE_CONTENE_TYPE];
+  }
+};
+
+const onContentTypeSelectChange = (e) => {
+  if (e === 'query') {
+    formData.value.method = 'GET';
+    searchFormData.value.method = 'GET';
+  }
+};
+
+const onDataStandardSelectChange = async (e) => {
+  // 获取所有id下的数据结构
+  const { list: dataStructureList } = await getDataStructureList({ sharedDataStandardId: e || '' });
+  selectDataStructure.value = dataStructureList.map((item) => {
+    let label = `${item.fieldName}(${item.fieldDescription})`;
+    if (item?.isUnique) {
+      label = `${item.fieldName}(${item.fieldDescription}) [唯一]`;
+    }
+    return { label, value: item.fieldName, ...item };
+  });
+};
+
 // 编辑之前
 const handleClickEdit = async ({ row }) => {
-  addVisible.value = true;
   treeTableData.value = JSON.parse(row.response);
   responseFieldMappingList.value = JSON.parse(row.responseFieldMapping);
   console.log(row, 'row');
-  formData.value = { ...row, dataSourceId: row.dataSourceId?.id };
+  formData.value = { ...row, dataSourceId: row.dataSourceId?.id, sharedDataStandardId: row.sharedDataStandardId?.id };
+  await onDataStandardSelectChange(row.sharedDataStandardId?.id);
   onMethodSelectChange(formData.value.method);
+  addVisible.value = true;
 };
 
 watch(addVisible, (newVal) => {
@@ -519,7 +548,7 @@ const onConfirmAdd = async ({ firstError }: SubmitContext<Data>) => {
   try {
     const params = {
       ...formData.value,
-      sharedDataStandardId: id,
+      shareDataId: id,
       response: tableDate,
       responseFieldMapping: JSON.stringify(responseFieldMappingList.value),
     };

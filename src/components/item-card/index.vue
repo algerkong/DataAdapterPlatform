@@ -29,7 +29,7 @@
           <t-avatar>{{ systemItem.principalName }}</t-avatar>
         </t-avatar-group>
         <div>
-          <t-button size="small" ghost @click.stop="clickdataSharing">数据共享</t-button>
+          <t-button size="small" ghost @click.stop="toDataShare">数据共享</t-button>
         </div>
       </div>
     </template>
@@ -102,9 +102,9 @@ const clickOnline = async () => {
 
 const Router = useRouter();
 
-const clickdataSharing = () => {
+const toDataShare = () => {
   Router.push({
-    path: `/system/dataSharing/${props.item.id}`,
+    path: `/system/dataShare/${props.item.id}`,
   });
 };
 </script>
